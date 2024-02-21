@@ -84,6 +84,10 @@ const TodoList: React.FC<TodoListProps> = ({
           <Stack gap={14}>
             {listData
               .filter((item) => !item.checked)
+              .sort(
+                (a, b) =>
+                  dayjs(a.duedate).valueOf() - dayjs(b.duedate).valueOf()
+              )
               .map((item: TodoData) => (
                 <TodoItem
                   key={item.id}
@@ -103,6 +107,10 @@ const TodoList: React.FC<TodoListProps> = ({
           <Stack gap={14}>
             {listData
               .filter((item) => item.checked)
+              .sort(
+                (a, b) =>
+                  dayjs(a.duedate).valueOf() - dayjs(b.duedate).valueOf()
+              )
               .map((item: TodoData) => (
                 <TodoItem
                   key={item.id}

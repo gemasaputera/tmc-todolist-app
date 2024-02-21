@@ -40,10 +40,10 @@ const TodoItem: React.FC<TodoItemProps> = ({
   };
 
   const dateLabel = () => {
-    if (due.isBefore(today)) {
+    if (due.isBefore(today) && !checked) {
       return `Overdue - ${formatDate(new Date(duedate), 'DD/MM/YYYY')}`;
     }
-    if (due.isSame(today)) {
+    if (due.isSame(today) && !checked) {
       return 'Today';
     }
     return formatDate(new Date(duedate), 'DD/MM/YYYY');
