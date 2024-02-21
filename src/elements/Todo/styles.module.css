@@ -1,0 +1,16 @@
+.container-todo-item {
+  border: 1px solid #cdd5e0;
+  background-color: #fff;
+  border-radius: 16px;
+}
+
+.container-subtask-todo-item {
+  border: 1px solid #fff;
+  background-color: #fff;
+  border-radius: 16px;
+  transition: all 0.3s ease;
+}
+
+.container-subtask-todo-item:hover {
+  border: 1px solid #154886;
+}

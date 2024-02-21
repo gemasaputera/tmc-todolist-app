@@ -1,0 +1,27 @@
+.container {
+  height: 100vh;
+  overflow: hidden;
+}
+
+.leftSection {
+  display: none;
+}
+
+.assetsLeft {
+  position: absolute;
+  left: -2rem;
+  bottom: -3rem;
+}
+
+.assetsRight {
+  position: absolute;
+  right: 22px;
+  top: -1rem;
+}
+
+@media (min-width: 62em) {
+  .leftSection {
+    z-index: 1;
+    display: flex;
+  }
+}

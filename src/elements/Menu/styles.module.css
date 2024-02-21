@@ -1,0 +1,22 @@
+.menu-item {
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.menu-item__group {
+  background: transparent;
+  color: #4f4f4f;
+  transition: all 0.3s ease-in-out;
+}
+
+.menu-item__group:hover {
+  border-radius: 8px;
+  background: #f0f0f0;
+  color: #4f4f4f;
+}
+
+.active-menu {
+  border-radius: 8px;
+  color: #fff;
+  background: linear-gradient(331.52deg, #4f92e3 -40.89%, #154886 96.79%);
+}
