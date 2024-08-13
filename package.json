@@ -10,7 +10,6 @@
   },
   "dependencies": {
     "@hookform/resolvers": "^3.3.4",
-    "@iconscout/react-unicons": "^2.0.2",
     "@mantine/core": "^7.5.3",
     "@mantine/dates": "^7.5.3",
     "@mantine/hooks": "^7.5.3",
