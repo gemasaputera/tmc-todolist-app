@@ -23,12 +23,25 @@ const ModalLogout: React.FC<ModalLogoutProps> = ({
     useLocalStorage<string>(defaultActiveSession);
   const [token, setToken, removeToken] =
     useLocalStorage<string>(dummyTokenSession);
-  const handleLogout = () => {
-    onClose();
-    removeUsers();
-    removeToken();
-    signOut();
-    router.push('/login');
+  const handleLogout = async () => {
+    try {
+      const response = await fetch('/api/logout', {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+
+      if (response.ok) {
+        // Using Next.js 14 navigation
+        router.replace('/login');
+      } else {
+        // Handle error cases
+        console.error('Login failed');
+      }
+    } catch (error) {
+      console.error('Error during login:', error);
+    }
   };
   return (
     <ModalWrapper opened={opened} close={onClose} title={title}>

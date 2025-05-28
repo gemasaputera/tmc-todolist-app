@@ -10,7 +10,15 @@ const inter = Inter({ subsets: ['latin'] });
 
 export const metadata: Metadata = {
   title: 'Todo Apps',
-  description: 'Organize Your Day, Simplify Your Life.'
+  description: 'Organize Your Day, Simplify Your Life by Gema Saputera',
+  creator: 'Gema Saputera',
+  keywords: ['todo', 'app', 'gema', 'saputera'],
+  robots: 'index, follow',
+  viewport: 'width=device-width, initial-scale=1',
+  openGraph: {
+    title: 'Login | Todo App by Gema Saputera',
+    description: 'Login page for Todo App by Gema Saputera',
+  }
 };
 
 export default function RootLayout({

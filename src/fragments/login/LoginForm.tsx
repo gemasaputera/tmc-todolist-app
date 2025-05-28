@@ -4,75 +4,29 @@ import { yupResolver } from '@hookform/resolvers/yup';
 import {
   Button,
   Container,
-  Divider,
   PasswordInput,
   Stack,
   Text,
   TextInput
 } from '@mantine/core';
-import React, { useEffect, useState } from 'react';
+import { useRouter } from 'next/navigation';
+import React from 'react';
 import { SubmitHandler, useForm } from 'react-hook-form';
 import { scheme } from './validation';
-import { FcGoogle } from 'react-icons/fc';
-import styles from './styles.module.css';
-import { useLocalStorage } from '@mantine/hooks';
-import { useRouter } from 'next/navigation';
-import { signIn } from 'next-auth/react';
-import {
-  defaultActiveSession,
-  dummyTokenSession,
-  usersSession
-} from '@/constant';
-import { UserData } from '@/types/userData';
 
 interface FormLoginProps {
   email: string;
   password: string;
 }
 
-const defaultValues: FormLoginProps = {
-  email: '',
-  password: ''
-};
-
 interface LoginFormProps {
   user: any;
+  handleSubmitForm: (values: FormLoginProps) => void;
 }
 
-const LoginForm: React.FC<LoginFormProps> = ({ user }) => {
-  const [users, setUsers] = useLocalStorage<string>(usersSession);
-  const [activeSession, setActiveSession] =
-    useLocalStorage<string>(defaultActiveSession);
-  const [token, setToken] = useLocalStorage<string>(dummyTokenSession);
+const LoginForm: React.FC<LoginFormProps> = ({ user, handleSubmitForm }) => {
   const router = useRouter();
 
-  const [errorState, setErrorState] = useState<FormLoginProps>(defaultValues);
-
-  useEffect(() => {
-    if (token !== '' || user) {
-      if (user) {
-        const _users: UserData[] = users ? JSON.parse(users) : [];
-        const filtered = _users.filter((item) => item?.email === user?.email);
-        if (filtered.length > 0) {
-          setToken(process.env.NEXT_PUBLIC_TOKEN as string);
-          setActiveSession(JSON.stringify(user));
-        } else {
-          _users.push({
-            email: user?.email,
-            name: user?.name,
-            image: user?.image,
-            password: ''
-          });
-          const _users_stringify: string = JSON.stringify(_users);
-          setUsers(_users_stringify);
-          setToken(process.env.NEXT_PUBLIC_TOKEN as string);
-          setActiveSession(JSON.stringify(filtered[0]));
-        }
-      }
-      router.push('/');
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [token, user]);
 
   const {
     register,
@@ -82,41 +36,31 @@ const LoginForm: React.FC<LoginFormProps> = ({ user }) => {
     resolver: yupResolver(scheme)
   });
 
-  const handleSubmitForm: SubmitHandler<FormLoginProps> = (values) => {
-    if (!users) {
-      const _users = [values];
-      const _users_stringify: string = JSON.stringify(_users);
-      setUsers(_users_stringify);
-      setToken(process.env.NEXT_PUBLIC_TOKEN as string);
-      setActiveSession(JSON.stringify(values));
-    } else {
-      const _users: UserData[] = JSON.parse(users);
-      const userEmail: any = _users.find((user) => user.email === values.email);
-      if (userEmail) {
-        if (userEmail.password === values.password) {
-          setErrorState(defaultValues);
-          setToken(process.env.NEXT_PUBLIC_TOKEN as string);
-          setActiveSession(JSON.stringify(userEmail));
-        } else {
-          setErrorState({
-            email: '',
-            password: 'Password is incorrect'
-          });
-        }
+  const onSubmit: SubmitHandler<FormLoginProps> = async (values) => {
+    try {
+      const response = await fetch('/api/login', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(values),
+      });
+
+      if (response.ok) {
+        // Using Next.js 14 navigation
+        router.replace('/');
       } else {
-        const _users: UserData[] = JSON.parse(users);
-        _users.push(values);
-        const _users_stringify: string = JSON.stringify(_users);
-        setUsers(_users_stringify);
-        setToken(process.env.NEXT_PUBLIC_TOKEN as string);
-        setActiveSession(JSON.stringify(values));
+        // Handle error cases
+        console.error('Login failed');
       }
+    } catch (error) {
+      console.error('Error during login:', error);
     }
   };
 
   return (
     <Container size={'xs'} mx={'auto'} w={'100%'}>
-      <form onSubmit={handleSubmit(handleSubmitForm)}>
+      <form onSubmit={handleSubmit(onSubmit)}>
         <Stack gap={16}>
           <Text fz={32} fw={500} pb={16}>
             Welcome Back
@@ -127,7 +71,7 @@ const LoginForm: React.FC<LoginFormProps> = ({ user }) => {
               placeholder="Email"
               withAsterisk
               radius={'md'}
-              error={errorState?.email || errors?.email?.message}
+              error={errors?.email?.message}
               {...register('email')}
             />
 
@@ -136,7 +80,7 @@ const LoginForm: React.FC<LoginFormProps> = ({ user }) => {
               placeholder="Password"
               withAsterisk
               radius={'md'}
-              error={errorState?.password || errors?.password?.message}
+              error={errors?.password?.message}
               {...register('password')}
             />
           </Stack>
@@ -151,7 +95,7 @@ const LoginForm: React.FC<LoginFormProps> = ({ user }) => {
               {' '}
               Sign in{' '}
             </Button>
-            <Divider label="Or" />
+            {/* <Divider label="Or" />
             <Button
               variant="outline"
               mih={48}
@@ -163,7 +107,7 @@ const LoginForm: React.FC<LoginFormProps> = ({ user }) => {
             >
               {' '}
               Google sign in
-            </Button>
+            </Button> */}
           </Stack>
         </Stack>
       </form>

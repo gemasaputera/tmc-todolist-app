@@ -1,12 +1,45 @@
 import { Flex } from '@mantine/core';
-import React from 'react';
+import React, { Suspense } from 'react';
 import styles from './styles.module.css';
 import Image from 'next/image';
 import LoginForm from '@/fragments/login/LoginForm';
 import { auth } from '../../auth';
+import { Metadata } from 'next';
+import { redirect } from 'next/navigation';
 
+
+export const metadata: Metadata = {
+  title: 'Login | Todo App by Gema Saputera',
+  keywords: ['todo', 'app', 'gema', 'saputera', 'login'],
+  robots: 'index, follow',
+  openGraph: {
+    title: 'Login | Todo App by Gema Saputera',
+    description: 'Login page for Todo App by Gema Saputera',
+  }
+}
 const LoginPage = async () => {
   const session = await auth();
+  const handleSubmitForm = async (values: any) => {
+    'use server'
+
+    try {
+      const response = await fetch('/api/login', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(values)
+      });
+
+      if (!response.ok) {
+        throw new Error('Login failed');
+      }
+      redirect('/');
+    } catch (error) {
+      console.error('Login error:', error);
+      throw error;
+    }
+  }
   return (
     <Flex
       flex={1}
@@ -36,8 +69,9 @@ const LoginPage = async () => {
         pos={'relative'}
         flex={1}
       >
-        <LoginForm user={session?.user} />
-
+        <Suspense fallback={<div>Loading...</div>}>
+          <LoginForm user={session?.user} handleSubmitForm={handleSubmitForm} />
+        </Suspense>
         <Image
           className={styles.assetsLeft}
           src="/assets-rectangle.svg"
