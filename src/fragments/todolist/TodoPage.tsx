@@ -9,7 +9,6 @@ import { useDisclosure, useLocalStorage } from '@mantine/hooks';
 import ModalCreateTodo, { FormCreateTodo } from '../modal/ModalCreateTodo';
 import { ModalType } from '@/types/modal';
 import styles from './styles.module.css';
-import withAuth from '@/hoc/withAuth';
 import { TodoData } from '@/types/todo';
 import { v4 as uuidv4 } from 'uuid';
 import ModalDelete from '../modal/ModalDelete';
@@ -140,11 +139,11 @@ const TodoPage = () => {
     <>
       <AppShell.Main pr={32}>
         <section className={styles['container-section']}>
-          <Group align="center" mb={32}>
+          <Group align='center' mb={32}>
             <Text fz={24}>📝 Todo</Text>
             <Button
               rightSection={<HiPlus />}
-              variant="outline"
+              variant='outline'
               radius={'md'}
               px={16}
               py={14}
@@ -193,4 +192,4 @@ const TodoPage = () => {
   );
 };
 
-export default withAuth(TodoPage);
+export default TodoPage;

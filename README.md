@@ -6,7 +6,7 @@
 <div align="center">Built with the Next.js App Router</div>
 <br />
 <div align="center">
-<a href="https://tmc-todolistapp.gemasaputera.id/">Demo</a>
+<a href="https://todo-app.gemasaputera.id">Demo</a>
 <span> · </span>
 <a href="https://github.com/gemasaputera/tmc-todolist-app">Clone & Deploy</a>
 <span>
