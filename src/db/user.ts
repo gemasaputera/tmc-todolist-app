@@ -2,16 +2,18 @@ import db from '.';
 
 export async function createUser({
   email,
-  password
+  password,
+  name
 }: {
   email: string;
   password: string;
+  name: string;
 }) {
   return await db.user.create({
     data: {
       email,
       password,
-      name: email
+      name: name || email // Use provided name or fallback to email
     }
   });
 }
