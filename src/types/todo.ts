@@ -1,13 +1,13 @@
 export type SubtaskData = {
-  subtaskId: string;
+  id: string;
   checked: boolean;
-  title: string;
+  description: string;
 };
 
 export type TodoData = {
   id: string;
   checked: boolean;
   duedate: string;
-  title: string;
-  subtask: SubtaskData[];
+  description: string;
+  subTodos: SubtaskData[];
 };

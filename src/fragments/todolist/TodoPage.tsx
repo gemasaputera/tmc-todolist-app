@@ -13,6 +13,7 @@ import { TodoData } from '@/types/todo';
 import { v4 as uuidv4 } from 'uuid';
 import ModalDelete from '../modal/ModalDelete';
 import { defaultActiveSession, userTodoList } from '@/constant';
+import { addTodo } from '@/db/todo';
 
 const TodoPage = () => {
   const [modalType, setModalType] = useState<ModalType>('create');
@@ -38,9 +39,24 @@ const TodoPage = () => {
   const [openedDelete, { toggle: toggleDelete }] = useDisclosure(false);
   const [listTodo, setListTodo] = useState<TodoData[]>(getInitialTodoList());
 
+  // useEffect(() => {
+  //   setListTodo(getInitialTodoList());
+  // }, [getInitialTodoList]);
+
   useEffect(() => {
-    setListTodo(getInitialTodoList());
-  }, [getInitialTodoList]);
+    const fetchData = async () => {
+      try {
+        const todo = await fetch('api/todo');
+        const todoData = await todo.json();
+        console.log(todoData, 'todoData');
+        setListTodo(todoData?.data || []);
+      } catch (error) {
+        console.log(error, 'error');
+      }
+    };
+    fetchData();
+  }, []);
+  console.log(listTodo, 'listTodo');
 
   const saveToLocalstorage = useCallback(
     (dataTodo: any) => {
@@ -105,39 +121,53 @@ const TodoPage = () => {
     toggleDelete();
   };
 
-  const onSubmit = (values: FormCreateTodo) => {
-    if (modalType === 'update') {
-      const _data = listTodo.map((item) => {
-        if (item.id === selectedItem?.id) {
-          return { ...item, title: values.todo, duedate: values.deadline };
+  const onSubmit = async (values: FormCreateTodo) => {
+    try {
+      const todo = await fetch('api/todo', {
+        method: 'POST',
+        body: JSON.stringify({
+          description: values.todo,
+          dueDate: new Date(values.deadline)
+        }),
+        headers: {
+          'Content-Type': 'application/json'
         }
-        return item;
       });
-
-      setListTodo(_data);
       toggleModal();
-      return;
+    } catch (error) {
+      console.log(error, 'error');
     }
+    // if (modalType === 'update') {
+    //   const _data = listTodo.map((item) => {
+    //     if (item.id === selectedItem?.id) {
+    //       return { ...item, title: values.todo, duedate: values.deadline };
+    //     }
+    //     return item;
+    //   });
 
-    const id = uuidv4();
-    const _data = [
-      ...listTodo,
-      {
-        id: id,
-        checked: false,
-        duedate: values.deadline,
-        subtask: [],
-        title: values.todo
-      }
-    ];
+    //   setListTodo(_data);
+    //   toggleModal();
+    //   return;
+    // }
 
-    setListTodo(_data);
-    toggleModal();
+    // const id = uuidv4();
+    // const _data = [
+    //   ...listTodo,
+    //   {
+    //     id: id,
+    //     checked: false,
+    //     duedate: values.deadline,
+    //     subtask: [],
+    //     title: values.todo
+    //   }
+    // ];
+
+    // setListTodo(_data);
   };
 
   return (
     <>
-      <AppShell.Main pr={32}>
+      <AppShell.Main pr={{ base: 0, md: 32 }}>
         <section className={styles['container-section']}>
           <Group align='center' mb={32}>
             <Text fz={24}>📝 Todo</Text>
@@ -186,7 +216,7 @@ const TodoPage = () => {
         opened={openedDelete}
         onClose={toggleDelete}
         onConfirm={onDelete}
-        name={selectedItem?.title || ''}
+        name={selectedItem?.description || ''}
       />
     </>
   );

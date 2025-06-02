@@ -11,7 +11,7 @@ const MainPage = () => {
   const [opened, { toggle }] = useDisclosure(false);
   return (
     <AppShell
-      layout="alt"
+      layout='alt'
       header={{ height: 60 }}
       footer={{ height: 60 }}
       navbar={{
@@ -19,7 +19,7 @@ const MainPage = () => {
         breakpoint: 'sm',
         collapsed: { desktop: opened, mobile: opened }
       }}
-      padding="md"
+      padding='md'
     >
       <Header collapsed={opened} toggle={() => toggle()} />
       <Sidebar toggle={() => toggle()} />

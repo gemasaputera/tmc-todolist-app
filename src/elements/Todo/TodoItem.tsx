@@ -18,8 +18,8 @@ interface TodoItemProps extends TodoData {
 const TodoItem: React.FC<TodoItemProps> = ({
   checked,
   duedate,
-  title,
-  subtask,
+  description,
+  subTodos,
   onChecked,
   onCheckedSubtask,
   onEdit,
@@ -50,8 +50,8 @@ const TodoItem: React.FC<TodoItemProps> = ({
   };
 
   const handleCheckedSubtask = (subtaskId: string, checked: boolean) => {
-    const _subtask = subtask.map((item) => {
-      if (item.subtaskId === subtaskId) {
+    const _subtask = subTodos.map((item) => {
+      if (item.id === subtaskId) {
         return { ...item, checked: checked };
       }
       return item;
@@ -60,8 +60,8 @@ const TodoItem: React.FC<TodoItemProps> = ({
   };
 
   const handleChangeTitle = (subtaskId: string, value: string) => {
-    const _subtask = subtask.map((item) => {
-      if (item.subtaskId === subtaskId) {
+    const _subtask = subTodos.map((item) => {
+      if (item.id === subtaskId) {
         return { ...item, title: value };
       }
       return item;
@@ -70,7 +70,7 @@ const TodoItem: React.FC<TodoItemProps> = ({
   };
 
   const handleDeleteSubstask = (subtaskId: string) => {
-    const _subtask = subtask.filter((item) => item.subtaskId !== subtaskId);
+    const _subtask = subTodos.filter((item) => item.id !== subtaskId);
     onCheckedSubtask(id, _subtask);
   };
 
@@ -79,10 +79,10 @@ const TodoItem: React.FC<TodoItemProps> = ({
       <Flex px={15} py={13} gap={16} align={'center'}>
         <Checkbox
           defaultChecked={checked}
-          color="green"
-          iconColor="#fff"
-          size="sm"
-          label=""
+          color='green'
+          iconColor='#fff'
+          size='sm'
+          label=''
           onChange={(event) => onChecked(id, event.target.checked)}
         />
         <Text
@@ -93,7 +93,7 @@ const TodoItem: React.FC<TodoItemProps> = ({
             textDecoration: checked ? 'line-through' : 'none'
           }}
         >
-          {title}
+          {description}
         </Text>
         <Text fz={13} fw={400} c={dateColor()}>
           {dateLabel()}
@@ -105,11 +105,11 @@ const TodoItem: React.FC<TodoItemProps> = ({
           id={id}
         />
       </Flex>
-      {subtask.length > 0 && (
+      {subTodos.length > 0 && (
         <Stack gap={15} px={15} pb={15}>
-          {subtask.map((item) => (
+          {subTodos.map((item) => (
             <SubTodoItem
-              key={item.subtaskId}
+              key={item.id}
               {...item}
               onChecked={handleCheckedSubtask}
               onDelete={handleDeleteSubstask}

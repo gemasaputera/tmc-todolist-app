@@ -4,7 +4,6 @@ import { TodoData } from '@/types/todo';
 import { Grid, Stack } from '@mantine/core';
 import React, { useEffect, useState } from 'react';
 import dayjs from 'dayjs';
-import { v4 as uuidv4 } from 'uuid';
 
 interface TodoListProps {
   data: TodoData[];
@@ -35,7 +34,7 @@ const TodoList: React.FC<TodoListProps> = ({
     setListTodo(
       listData.map((item) => {
         if (item.id === id) {
-          const _subtask = item.subtask.map((subtask) => {
+          const _subtask = item.subTodos.map((subtask) => {
             return { ...subtask, checked: checked };
           });
           return { ...item, checked: checked, subtask: _subtask };
@@ -56,31 +55,24 @@ const TodoList: React.FC<TodoListProps> = ({
     );
   };
 
-  const handleAddSubtask = (id: string) => {
-    const subtaskId = uuidv4();
-    const _data = listData.map((item) => {
-      if (item.id === id) {
-        return {
-          ...item,
-          subtask: [
-            ...item.subtask,
-            {
-              subtaskId: subtaskId,
-              checked: false,
-              title: `New sub Todo ${item.subtask.length + 1}`
-            }
-          ]
-        };
-      }
-      return item;
-    });
-    setListTodo(_data);
+  const handleAddSubtask = async (id: string) => {
+    try {
+      const createSubtodo = await fetch('api/todo/subtodo', {
+        method: 'POST',
+        body: JSON.stringify({
+          todoId: id,
+          description: `New sub Todo ${listData.length + 1}`
+        })
+      });
+    } catch (error) {
+      console.log(error);
+    }
   };
 
   return (
-    <Grid gutter={40}>
+    <Grid gutter={{ base: 12, md: 40 }}>
       <Grid.Col span={{ base: 12, md: 6 }}>
-        <Card title="Not Checked">
+        <Card title='Not Checked'>
           <Stack gap={14}>
             {listData
               .filter((item) => !item.checked)
@@ -103,7 +95,7 @@ const TodoList: React.FC<TodoListProps> = ({
         </Card>
       </Grid.Col>
       <Grid.Col span={{ base: 12, md: 6 }}>
-        <Card title="Checked">
+        <Card title='Checked'>
           <Stack gap={14}>
             {listData
               .filter((item) => item.checked)

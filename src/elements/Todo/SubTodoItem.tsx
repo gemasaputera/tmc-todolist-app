@@ -13,20 +13,20 @@ interface SubTodoItemProps extends SubtaskData {
 }
 const SubTodoItem: React.FC<SubTodoItemProps> = ({
   checked,
-  title,
+  description,
   onChecked,
   onChange,
   onDelete,
-  subtaskId
+  id: subtaskId
 }) => {
   const [openModal, { toggle }] = useDisclosure(false);
   const [value, setValue] = useState<string>('');
 
   useEffect(() => {
-    if (!checked && title) {
-      setValue(title);
+    if (!checked && description) {
+      setValue(description);
     }
-  }, [title, checked]);
+  }, [description, checked]);
 
   const handleDeleteSubstask = () => {
     toggle();
@@ -52,10 +52,10 @@ const SubTodoItem: React.FC<SubTodoItemProps> = ({
       >
         <Checkbox
           defaultChecked={checked}
-          color="green"
-          iconColor="#fff"
-          size="sm"
-          label=""
+          color='green'
+          iconColor='#fff'
+          size='sm'
+          label=''
           onChange={(event) => onChecked(subtaskId, event.target.checked)}
         />
         {checked ? (
@@ -67,14 +67,14 @@ const SubTodoItem: React.FC<SubTodoItemProps> = ({
               textDecoration: checked ? 'line-through' : 'none'
             }}
           >
-            {title}
+            {description}
           </Text>
         ) : (
           <Input
             flex={1}
-            variant="unstyled"
-            placeholder={title}
-            defaultValue={title}
+            variant='unstyled'
+            placeholder={description}
+            defaultValue={description}
             value={value}
             onChange={(event) => handleChangeTitle(event.target.value)}
             styles={{
@@ -85,15 +85,15 @@ const SubTodoItem: React.FC<SubTodoItemProps> = ({
           />
         )}
 
-        <ActionIcon variant="transparent" onClick={handleDeleteSubstask}>
-          <FiTrash color="#4F4F4F" />
+        <ActionIcon variant='transparent' onClick={handleDeleteSubstask}>
+          <FiTrash color='#4F4F4F' />
         </ActionIcon>
       </Flex>
       <ModalDelete
         opened={openModal}
         onClose={handleDeleteSubstask}
         onConfirm={onDeleteData}
-        name={title || ''}
+        name={description || ''}
       />
     </>
   );

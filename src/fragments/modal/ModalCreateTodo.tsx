@@ -53,14 +53,14 @@ const ModalCreateTodo: React.FC<ModalCreateTodoProps> = ({
   } = useForm<FormCreateTodo>({
     defaultValues: {
       deadline: data?.duedate ? new Date(data?.duedate).toString() : '',
-      todo: data?.title || ''
+      todo: data?.description || ''
     },
     resolver: yupResolver(scheme)
   });
 
-  const handleChangeDate = (date: any, field: any) => {
+  const handleChangeDate = (date: string, field: any) => {
     setDeadlineDate(date);
-    field.onChange(date.toISOString() as string);
+    field.onChange(date);
   };
 
   const handleSubmitForm: SubmitHandler<FormCreateTodo> = (values) => {
@@ -78,34 +78,34 @@ const ModalCreateTodo: React.FC<ModalCreateTodoProps> = ({
       <form onSubmit={handleSubmit(handleSubmitForm)}>
         <Stack gap={24}>
           <TextInput
-            label="Todo"
+            label='Todo'
             withAsterisk
-            placeholder="Todo"
+            placeholder='Todo'
             error={errors?.todo?.message as string}
             {...register('todo')}
           />
 
           <Controller
-            name="deadline"
+            name='deadline'
             render={({ field }) => (
               <DateTimePicker
-                label="Date Time"
+                label='Date Time'
                 withAsterisk
                 minDate={type === 'create' ? new Date() : undefined}
                 value={deadlineDate}
-                placeholder="DD/MM/YYYY Time"
+                placeholder='DD/MM/YYYY Time'
                 error={errors?.deadline?.message as string}
-                onChange={(date) => handleChangeDate(date, field)}
+                onChange={(date) => handleChangeDate(date as string, field)}
               />
             )}
             control={control}
           />
 
-          <Group justify="flex-end" gap={16} pt={16}>
+          <Group justify='flex-end' gap={16} pt={16}>
             <Button
               p={12}
               miw={110}
-              type="submit"
+              type='submit'
               styles={{
                 root: {
                   backgroundColor: '#154886',
@@ -117,7 +117,7 @@ const ModalCreateTodo: React.FC<ModalCreateTodoProps> = ({
               Save
             </Button>
             <Button
-              variant="light"
+              variant='light'
               onClick={onClose}
               p={12}
               miw={110}
