@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, cache } from 'react';
 
 interface UserSession {
   id: string;
@@ -19,7 +19,7 @@ export function useUserSession(): {
   const [error, setError] = useState<Error | null>(null);
 
   useEffect(() => {
-    const fetchUserSession = async () => {
+    const fetchUserSession = cache(async () => {
       try {
         setLoading(true);
         const response = await fetch('/api/user/session', {
@@ -39,7 +39,7 @@ export function useUserSession(): {
       } finally {
         setLoading(false);
       }
-    };
+    });
 
     fetchUserSession();
   }, []);

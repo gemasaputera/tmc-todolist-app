@@ -12,20 +12,15 @@ interface NavbarProps {
 
 const Navbar: React.FC<NavbarProps> = ({ user, collapsed, toggle }) => {
   return (
-    <Group px={32} py={14} flex={1} gap={32}>
-      {collapsed && <Burger opened={collapsed} onClick={toggle} size="sm" />}
-      <TextInput
-        placeholder="Search"
-        leftSection={<FiSearch size={16} />}
-        flex={1}
-        radius={'md'}
-        styles={{
-          input: { backgroundColor: '#f1f3f4', border: 'none' }
-        }}
-      />
-      <ActionIcon variant="transparent">
-        <HiOutlineCalendar color="#4F4F4F" size={24} />
-      </ActionIcon>
+    <Group
+      px={32}
+      justify={collapsed ? 'space-between' : 'flex-end'}
+      py={14}
+      flex={1}
+      gap={32}
+    >
+      {collapsed && <Burger opened={collapsed} onClick={toggle} size='sm' />}
+
       <ProfileAction user={user} />
     </Group>
   );

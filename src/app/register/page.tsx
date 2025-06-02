@@ -29,7 +29,6 @@ const RegisterPage = async () => {
       <Flex w={'100%'} maw={1000} h={'100%'} style={{ overflow: 'hidden' }}>
         <Flex
           w={'50%'}
-          bg={'#154886'}
           justify={'center'}
           align={'center'}
           display={{ base: 'none', md: 'flex' }}

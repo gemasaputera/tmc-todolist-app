@@ -4,22 +4,14 @@ import Menu, { MenuData } from '@/elements/Menu';
 import { ActionIcon, AppShell, Group, Stack } from '@mantine/core';
 import Image from 'next/image';
 import React from 'react';
-import { GoHome } from 'react-icons/go';
 import { HiOutlineDocumentText } from 'react-icons/hi2';
 
 interface SidebarProps {
   toggle?: () => void;
 }
 
-const Sidebar:React.FC<SidebarProps> = ({
-  toggle
-}) => {
+const Sidebar: React.FC<SidebarProps> = ({ toggle }) => {
   const menulist: MenuData[] = [
-    {
-      icon: <GoHome size={20} />,
-      title: 'Dashboard',
-      url: '/dashboard'
-    },
     {
       icon: <HiOutlineDocumentText size={20} />,
       title: 'Todo',
@@ -27,21 +19,21 @@ const Sidebar:React.FC<SidebarProps> = ({
     }
   ];
   return (
-    <AppShell.Navbar p="md" className="box-shadow" withBorder={false}>
+    <AppShell.Navbar p='md' className='box-shadow' withBorder={false}>
       <Group>
-        <Group justify="space-between" flex={1}>
+        <Group justify='space-between' flex={1}>
           <Image
             src={'/todolist-logo-horizontal.svg'}
             width={123}
             height={49}
-            alt="logo-todolist"
+            alt='logo-todolist'
           />
-          <ActionIcon variant="transparent" onClick={toggle}>
+          <ActionIcon variant='transparent' onClick={toggle}>
             <Image
               src={'/icon_circle-blue.svg'}
               width={24}
               height={40}
-              alt="avatar"
+              alt='avatar'
             />
           </ActionIcon>
         </Group>

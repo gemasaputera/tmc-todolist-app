@@ -1,5 +1,5 @@
 import { SubtaskData } from '@/types/todo';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import styles from './styles.module.css';
 import { ActionIcon, Checkbox, Flex, Input, Text } from '@mantine/core';
 import { FiTrash } from 'react-icons/fi';
@@ -21,6 +21,7 @@ const SubTodoItem: React.FC<SubTodoItemProps> = ({
 }) => {
   const [openModal, { toggle }] = useDisclosure(false);
   const [value, setValue] = useState<string>('');
+  const debounceTimerRef = useRef<NodeJS.Timeout | null>(null);
 
   useEffect(() => {
     if (!checked && description) {
@@ -37,9 +38,42 @@ const SubTodoItem: React.FC<SubTodoItemProps> = ({
     toggle();
   };
 
-  const handleChangeTitle = (value: string) => {
-    onChange(subtaskId, value);
-    setValue(value);
+  const handleChangeTitle = (newValue: string) => {
+    // Update the local state immediately for a responsive UI
+    setValue(newValue);
+
+    // Clear any existing timer
+    if (debounceTimerRef.current) {
+      clearTimeout(debounceTimerRef.current);
+    }
+
+    // Set a new timer to update the server after a delay
+    debounceTimerRef.current = setTimeout(async () => {
+      try {
+        // Call the API to update the subtodo
+        const response = await fetch(`/api/todo/subtodo/${subtaskId}`, {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            description: newValue
+          })
+        });
+
+        if (response.ok) {
+          // Update the parent component's state
+          onChange(subtaskId, newValue);
+        } else {
+          // If the API call fails, revert to the original value
+          setValue(description || '');
+        }
+      } catch (error) {
+        console.error('Error updating subtodo:', error);
+        // If there's an error, revert to the original value
+        setValue(description || '');
+      }
+    }, 500); // 500ms debounce time
   };
   return (
     <>
@@ -74,8 +108,7 @@ const SubTodoItem: React.FC<SubTodoItemProps> = ({
             flex={1}
             variant='unstyled'
             placeholder={description}
-            defaultValue={description}
-            value={value}
+            value={value || ''}
             onChange={(event) => handleChangeTitle(event.target.value)}
             styles={{
               input: {

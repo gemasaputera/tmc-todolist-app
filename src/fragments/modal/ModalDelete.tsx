@@ -8,6 +8,7 @@ interface ModalDeleteProps {
   title?: string;
   onConfirm: () => void;
   name: string;
+  isLoading?: boolean;
 }
 
 const ModalDelete: React.FC<ModalDeleteProps> = ({
@@ -15,7 +16,8 @@ const ModalDelete: React.FC<ModalDeleteProps> = ({
   onClose,
   title = 'Confirm Delete',
   onConfirm,
-  name
+  name,
+  isLoading = false
 }) => {
   return (
     <ModalWrapper opened={opened} close={onClose} title={title}>
@@ -23,11 +25,12 @@ const ModalDelete: React.FC<ModalDeleteProps> = ({
         <Text fz={14} fw={400}>
           Are you sure you want to delete {name}?
         </Text>
-        <Group gap={16} flex={1} justify="flex-end">
+        <Group gap={16} flex={1} justify='flex-end'>
           <Button
             p={12}
             miw={110}
             h={'auto'}
+            loading={isLoading}
             styles={{
               root: {
                 backgroundColor: '#154886',
@@ -40,10 +43,11 @@ const ModalDelete: React.FC<ModalDeleteProps> = ({
             Confirm
           </Button>
           <Button
-            variant="light"
+            variant='light'
             p={12}
             h={'auto'}
             miw={110}
+            disabled={isLoading}
             styles={{
               root: {
                 backgroundColor: '#E3E8EF',

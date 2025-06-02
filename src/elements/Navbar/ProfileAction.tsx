@@ -2,9 +2,7 @@ import ModalLogout from '@/fragments/modal/ModalLogout';
 import { useUserSession } from '@/hooks/useUserSession';
 import {
   Group,
-  Stack,
   Text,
-  Indicator,
   Avatar,
   Menu,
   Button,
@@ -34,23 +32,16 @@ const ProfileAction: React.FC<ProfileActionProps> = () => {
           <Menu.Target>
             <Button variant='transparent' p={0} h={'auto'}>
               <Group gap={12}>
-                <Stack gap={0} justify='flex-end' align='flex-end'>
-                  <Tooltip label={user?.name || user?.email}>
-                    <Text fz={16} c={'#4F4F4F'} className={styles.username}>
-                      {user?.name || user?.email || ''}
-                    </Text>
-                  </Tooltip>
-                  <Text fz={12} c={'gray'}>
-                    Admin
+                <Tooltip label={user?.name || user?.email}>
+                  <Text fz={16} c={'#4F4F4F'} className={styles.username}>
+                    {user?.name || user?.email || ''}
                   </Text>
-                </Stack>
-                <Indicator color='green' position='bottom-end' mr={5} mb={5}>
-                  <Avatar
-                    size='sm'
-                    radius='xl'
-                    src={user?.image || '/default_profile.png'}
-                  />
-                </Indicator>
+                </Tooltip>
+                <Avatar
+                  size='sm'
+                  radius='xl'
+                  src={user?.image || '/default_profile.png'}
+                />
               </Group>
             </Button>
           </Menu.Target>

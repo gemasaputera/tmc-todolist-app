@@ -1,4 +1,5 @@
 import db from '.';
+import bcrypt from 'bcrypt';
 
 export async function createUser({
   email,
@@ -9,10 +10,13 @@ export async function createUser({
   password: string;
   name: string;
 }) {
+  // Hash the password with a salt of 10 rounds
+  const hashedPassword = await bcrypt.hash(password, 10);
+
   return await db.user.create({
     data: {
       email,
-      password,
+      password: hashedPassword,
       name: name || email // Use provided name or fallback to email
     }
   });

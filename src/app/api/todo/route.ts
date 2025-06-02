@@ -1,4 +1,4 @@
-import { addTodo, getTodo } from '@/db/todo';
+import { addTodo, deleteTodo, getTodo } from '@/db/todo';
 import { NextResponse } from 'next/server';
 import { cookies } from 'next/headers';
 

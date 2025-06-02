@@ -9,10 +9,13 @@ import {
   Text,
   TextInput
 } from '@mantine/core';
+import { notifications } from '@mantine/notifications';
+import { useMutation } from '@tanstack/react-query';
 import { useRouter } from 'next/navigation';
 import React from 'react';
 import { SubmitHandler, useForm } from 'react-hook-form';
 import { scheme } from './validation';
+import Link from 'next/link';
 
 interface FormLoginProps {
   email: string;
@@ -27,7 +30,6 @@ interface LoginFormProps {
 const LoginForm: React.FC<LoginFormProps> = ({ user, handleSubmitForm }) => {
   const router = useRouter();
 
-
   const {
     register,
     handleSubmit,
@@ -36,30 +38,47 @@ const LoginForm: React.FC<LoginFormProps> = ({ user, handleSubmitForm }) => {
     resolver: yupResolver(scheme)
   });
 
-  const onSubmit: SubmitHandler<FormLoginProps> = async (values) => {
-    try {
+  const loginMutation = useMutation({
+    mutationFn: async (values: FormLoginProps) => {
       const response = await fetch('/api/login', {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json',
+          'Content-Type': 'application/json'
         },
-        body: JSON.stringify(values),
+        body: JSON.stringify(values)
       });
 
-      if (response.ok) {
-        // Using Next.js 14 navigation
-        router.replace('/');
-      } else {
-        // Handle error cases
-        console.error('Login failed');
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || 'Login failed');
       }
-    } catch (error) {
-      console.error('Error during login:', error);
+
+      return response.json();
+    },
+    onSuccess: () => {
+      router.replace('/');
+
+      notifications.show({
+        title: 'Success',
+        message: 'Login successful',
+        color: 'green'
+      });
+    },
+    onError: (error: Error) => {
+      notifications.show({
+        title: 'Error',
+        message: error.message || 'Login failed',
+        color: 'red'
+      });
     }
+  });
+
+  const onSubmit: SubmitHandler<FormLoginProps> = (values) => {
+    loginMutation.mutate(values);
   };
 
   return (
-    <Container size={'xs'} mx={'auto'} w={'100%'}>
+    <Container size={'xs'} mx={'auto'} w={'100%'} style={{ zIndex: 99 }}>
       <form onSubmit={handleSubmit(onSubmit)}>
         <Stack gap={16}>
           <Text fz={32} fw={500} pb={16}>
@@ -67,8 +86,8 @@ const LoginForm: React.FC<LoginFormProps> = ({ user, handleSubmitForm }) => {
           </Text>
           <Stack gap={20}>
             <TextInput
-              label="Email"
-              placeholder="Email"
+              label='Email'
+              placeholder='Email'
               withAsterisk
               radius={'md'}
               error={errors?.email?.message}
@@ -76,8 +95,8 @@ const LoginForm: React.FC<LoginFormProps> = ({ user, handleSubmitForm }) => {
             />
 
             <PasswordInput
-              label="Password"
-              placeholder="Password"
+              label='Password'
+              placeholder='Password'
               withAsterisk
               radius={'md'}
               error={errors?.password?.message}
@@ -86,15 +105,21 @@ const LoginForm: React.FC<LoginFormProps> = ({ user, handleSubmitForm }) => {
           </Stack>
           <Stack gap={16} pt={24}>
             <Button
-              type="submit"
-              variant="filled"
+              type='submit'
+              variant='filled'
               bg={'#154886'}
               mih={48}
               radius={'md'}
+              loading={loginMutation.isPending}
             >
-              {' '}
-              Sign in{' '}
+              Sign in
             </Button>
+            <Text ta='center' size='sm'>
+              Don&apos;t have an account?{' '}
+              <Link href='/register' style={{ color: '#154886' }}>
+                Register
+              </Link>
+            </Text>
             {/* <Divider label="Or" />
             <Button
               variant="outline"

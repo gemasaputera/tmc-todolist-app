@@ -7,7 +7,7 @@ export type SubtaskData = {
 export type TodoData = {
   id: string;
   checked: boolean;
-  duedate: string;
+  dueDate: string;
   description: string;
   subTodos: SubtaskData[];
 };

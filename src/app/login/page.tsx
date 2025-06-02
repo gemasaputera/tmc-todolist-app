@@ -7,26 +7,25 @@ import { auth } from '../../auth';
 import { Metadata } from 'next';
 import { redirect } from 'next/navigation';
 
-
 export const metadata: Metadata = {
   title: 'Login | Todo App by Gema Saputera',
   keywords: ['todo', 'app', 'gema', 'saputera', 'login'],
   robots: 'index, follow',
   openGraph: {
     title: 'Login | Todo App by Gema Saputera',
-    description: 'Login page for Todo App by Gema Saputera',
+    description: 'Login page for Todo App by Gema Saputera'
   }
-}
+};
 const LoginPage = async () => {
   const session = await auth();
   const handleSubmitForm = async (values: any) => {
-    'use server'
+    'use server';
 
     try {
       const response = await fetch('/api/login', {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json',
+          'Content-Type': 'application/json'
         },
         body: JSON.stringify(values)
       });
@@ -39,7 +38,7 @@ const LoginPage = async () => {
       console.error('Login error:', error);
       throw error;
     }
-  }
+  };
   return (
     <Flex
       flex={1}
@@ -56,8 +55,8 @@ const LoginPage = async () => {
         className={styles.leftSection}
       >
         <Image
-          src="/illustration_login.png"
-          alt="logo"
+          src='/illustration_login.png'
+          alt='logo'
           width={1334 / 3}
           height={1284 / 3}
         />
@@ -74,15 +73,15 @@ const LoginPage = async () => {
         </Suspense>
         <Image
           className={styles.assetsLeft}
-          src="/assets-rectangle.svg"
-          alt="logo"
+          src='/assets-rectangle.svg'
+          alt='logo'
           width={220}
           height={220}
         />
         <Image
           className={styles.assetsRight}
-          src="/assets-rectangle-02.svg"
-          alt="logo"
+          src='/assets-rectangle-02.svg'
+          alt='logo'
           width={220}
           height={220}
         />

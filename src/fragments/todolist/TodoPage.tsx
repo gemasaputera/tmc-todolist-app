@@ -1,98 +1,34 @@
 'use client';
 
-import { AppShell, Button, Group, Text } from '@mantine/core';
-import React, { useCallback, useEffect, useState } from 'react';
+import { AppShell, Button, Group, Text, Title } from '@mantine/core';
+import React, { useState } from 'react';
 import { HiPlus } from 'react-icons/hi2';
 import TodoList from './TodoList';
 import IllustrationState from '@/elements/IllustrationState';
-import { useDisclosure, useLocalStorage } from '@mantine/hooks';
+import { useDisclosure } from '@mantine/hooks';
 import ModalCreateTodo, { FormCreateTodo } from '../modal/ModalCreateTodo';
 import { ModalType } from '@/types/modal';
 import styles from './styles.module.css';
 import { TodoData } from '@/types/todo';
-import { v4 as uuidv4 } from 'uuid';
 import ModalDelete from '../modal/ModalDelete';
-import { defaultActiveSession, userTodoList } from '@/constant';
-import { addTodo } from '@/db/todo';
+import {
+  useCreateTodo,
+  useDeleteTodo,
+  useUpdateTodo,
+  useTodos
+} from '@/hooks/useTodos';
 
 const TodoPage = () => {
   const [modalType, setModalType] = useState<ModalType>('create');
   const [selectedItem, setSelectedItem] = useState<TodoData | null>(null);
-
-  const [activeSession] = useLocalStorage<string>(defaultActiveSession);
-  const [dataUserTodoList, setDataUserTodoList] =
-    useLocalStorage<string>(userTodoList);
-  const getInitialTodoList = useCallback(() => {
-    if (dataUserTodoList) {
-      const _dataUserTodoList = JSON.parse(dataUserTodoList);
-      const profile = activeSession ? JSON.parse(activeSession) : {};
-      const _data = _dataUserTodoList.find(
-        (item: any) => item.email === profile?.email
-      );
-      if (_data && _data.todoList) {
-        return _data.todoList;
-      }
-    }
-    return [];
-  }, [activeSession, dataUserTodoList]);
   const [openedModal, { toggle: toggleModal }] = useDisclosure(false);
   const [openedDelete, { toggle: toggleDelete }] = useDisclosure(false);
-  const [listTodo, setListTodo] = useState<TodoData[]>(getInitialTodoList());
 
-  // useEffect(() => {
-  //   setListTodo(getInitialTodoList());
-  // }, [getInitialTodoList]);
-
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const todo = await fetch('api/todo');
-        const todoData = await todo.json();
-        console.log(todoData, 'todoData');
-        setListTodo(todoData?.data || []);
-      } catch (error) {
-        console.log(error, 'error');
-      }
-    };
-    fetchData();
-  }, []);
-  console.log(listTodo, 'listTodo');
-
-  const saveToLocalstorage = useCallback(
-    (dataTodo: any) => {
-      if (dataTodo.length === 0) return;
-      if (!dataUserTodoList) {
-        const profile = activeSession ? JSON.parse(activeSession) : {};
-        const _dataUserTodoList = [
-          {
-            email: profile?.email,
-            todoList: dataTodo
-          }
-        ];
-        setDataUserTodoList(JSON.stringify(_dataUserTodoList));
-      } else {
-        const _dataUserTodoList = JSON.parse(dataUserTodoList);
-        const profile = activeSession ? JSON.parse(activeSession) : {};
-        const index = _dataUserTodoList.findIndex(
-          (item: any) => item.email === profile?.email
-        );
-        if (index === -1) {
-          _dataUserTodoList.push({
-            email: profile?.email,
-            todoList: dataTodo
-          });
-        } else {
-          _dataUserTodoList[index].todoList = dataTodo;
-        }
-        setDataUserTodoList(JSON.stringify(_dataUserTodoList));
-      }
-    },
-    [activeSession, dataUserTodoList, setDataUserTodoList]
-  );
-
-  useEffect(() => {
-    saveToLocalstorage(listTodo);
-  }, [listTodo, saveToLocalstorage]);
+  // Use TanStack Query hooks
+  const { data: listTodo = [], isLoading, isError } = useTodos();
+  const createTodoMutation = useCreateTodo();
+  const updateTodoMutation = useUpdateTodo();
+  const deleteTodoMutation = useDeleteTodo();
 
   const handleCreateTodo = () => {
     setSelectedItem(null);
@@ -101,70 +37,63 @@ const TodoPage = () => {
   };
 
   const handleEditTodo = (id: string) => {
-    setSelectedItem(listTodo.find((item) => item.id === id) || null);
+    setSelectedItem(listTodo.find((item: TodoData) => item.id === id) || null);
     setModalType('update');
     toggleModal();
   };
 
   const handleDeleteTodo = (id: string) => {
-    setSelectedItem(listTodo.find((item) => item.id === id) || null);
+    setSelectedItem(listTodo.find((item: TodoData) => item.id === id) || null);
     setModalType('delete');
     toggleDelete();
   };
 
   const handleCloseModal = () => toggleModal();
 
-  const onDelete = () => {
-    const _data = listTodo.filter((item) => item.id !== selectedItem?.id);
-    setListTodo(_data);
-    setSelectedItem(null);
-    toggleDelete();
+  const onDelete = async () => {
+    if (!selectedItem) return;
+
+    // Use the delete mutation from TanStack Query
+    deleteTodoMutation.mutate(selectedItem.id, {
+      onSuccess: () => {
+        setSelectedItem(null);
+        toggleDelete();
+      }
+    });
   };
 
   const onSubmit = async (values: FormCreateTodo) => {
-    try {
-      const todo = await fetch('api/todo', {
-        method: 'POST',
-        body: JSON.stringify({
+    if (selectedItem?.id) {
+      // Update existing todo
+      updateTodoMutation.mutate(
+        {
+          id: selectedItem.id,
+          todoData: {
+            description: values.todo,
+            dueDate: new Date(values.deadline)
+          }
+        },
+        {
+          onSuccess: () => {
+            toggleModal();
+          }
+        }
+      );
+    } else {
+      // Create new todo
+      createTodoMutation.mutate(
+        {
           description: values.todo,
           dueDate: new Date(values.deadline)
-        }),
-        headers: {
-          'Content-Type': 'application/json'
+        },
+        {
+          onSuccess: () => {
+            toggleModal();
+          }
         }
-      });
-      toggleModal();
-    } catch (error) {
-      console.log(error, 'error');
+      );
     }
-    // if (modalType === 'update') {
-    //   const _data = listTodo.map((item) => {
-    //     if (item.id === selectedItem?.id) {
-    //       return { ...item, title: values.todo, duedate: values.deadline };
-    //     }
-    //     return item;
-    //   });
-
-    //   setListTodo(_data);
-    //   toggleModal();
-    //   return;
-    // }
-
-    // const id = uuidv4();
-    // const _data = [
-    //   ...listTodo,
-    //   {
-    //     id: id,
-    //     checked: false,
-    //     duedate: values.deadline,
-    //     subtask: [],
-    //     title: values.todo
-    //   }
-    // ];
-
-    // setListTodo(_data);
   };
-
   return (
     <>
       <AppShell.Main pr={{ base: 0, md: 32 }}>
@@ -186,20 +115,23 @@ const TodoPage = () => {
               }}
               onClick={handleCreateTodo}
             >
-              Created Todo
+              Create Todo
             </Button>
           </Group>
 
-          {listTodo.length > 0 && (
+          {isLoading ? (
+            <Text>Loading todos...</Text>
+          ) : isError ? (
+            <Text color='red'>Error loading todos. Please try again.</Text>
+          ) : listTodo.length > 0 ? (
             <TodoList
               data={listTodo}
-              setListTodo={setListTodo}
               onEdit={handleEditTodo}
               onDelete={handleDeleteTodo}
             />
+          ) : (
+            <IllustrationState />
           )}
-
-          {listTodo.length === 0 && <IllustrationState />}
         </section>
       </AppShell.Main>
 
@@ -210,6 +142,8 @@ const TodoPage = () => {
         type={modalType}
         data={selectedItem}
         key={selectedItem?.id || 'create'}
+        selectedItem={selectedItem}
+        isLoading={createTodoMutation.isPending || updateTodoMutation.isPending}
       />
 
       <ModalDelete
@@ -217,6 +151,7 @@ const TodoPage = () => {
         onClose={toggleDelete}
         onConfirm={onDelete}
         name={selectedItem?.description || ''}
+        isLoading={deleteTodoMutation.isPending}
       />
     </>
   );

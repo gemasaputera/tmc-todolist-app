@@ -6,6 +6,7 @@ import dayjs from 'dayjs';
 import { formatDate } from '@/utils/formatDate';
 import ActionTodo from './ActionTodo';
 import SubTodoItem from './SubTodoItem';
+import { useDeleteSubTodo, useUpdateSubTodo } from '@/hooks/useSubTodos';
 
 interface TodoItemProps extends TodoData {
   onChecked: (id: string, checked: boolean) => void;
@@ -17,7 +18,7 @@ interface TodoItemProps extends TodoData {
 
 const TodoItem: React.FC<TodoItemProps> = ({
   checked,
-  duedate,
+  dueDate,
   description,
   subTodos,
   onChecked,
@@ -28,7 +29,7 @@ const TodoItem: React.FC<TodoItemProps> = ({
   id
 }) => {
   const today = dayjs().startOf('day');
-  const due = dayjs(duedate, 'DD/MM/YYYY HH:mm').startOf('day');
+  const due = dayjs(dueDate, 'DD/MM/YYYY HH:mm').startOf('day');
   const dateColor = () => {
     if (due.isBefore(today) && !checked) {
       return 'red';
@@ -41,12 +42,12 @@ const TodoItem: React.FC<TodoItemProps> = ({
 
   const dateLabel = () => {
     if (due.isBefore(today) && !checked) {
-      return `Overdue - ${formatDate(new Date(duedate), 'DD/MM/YYYY')}`;
+      return `Overdue - ${formatDate(new Date(dueDate), 'DD/MM/YYYY')}`;
     }
     if (due.isSame(today) && !checked) {
       return 'Today';
     }
-    return formatDate(new Date(duedate), 'DD/MM/YYYY');
+    return formatDate(new Date(dueDate), 'DD/MM/YYYY');
   };
 
   const handleCheckedSubtask = (subtaskId: string, checked: boolean) => {
@@ -60,18 +61,32 @@ const TodoItem: React.FC<TodoItemProps> = ({
   };
 
   const handleChangeTitle = (subtaskId: string, value: string) => {
-    const _subtask = subTodos.map((item) => {
-      if (item.id === subtaskId) {
-        return { ...item, title: value };
+    updateSubTodoMutation.mutate(
+      { id: subtaskId, description: value },
+      {
+        onSuccess: () => {
+          const _subtask = subTodos.map((item) => {
+            if (item.id === subtaskId) {
+              return { ...item, description: value };
+            }
+            return item;
+          });
+          onCheckedSubtask(id, _subtask);
+        }
       }
-      return item;
-    });
-    onCheckedSubtask(id, _subtask);
+    );
   };
 
+  const deleteSubTodoMutation = useDeleteSubTodo();
+  const updateSubTodoMutation = useUpdateSubTodo();
+
   const handleDeleteSubstask = (subtaskId: string) => {
-    const _subtask = subTodos.filter((item) => item.id !== subtaskId);
-    onCheckedSubtask(id, _subtask);
+    deleteSubTodoMutation.mutate(subtaskId, {
+      onSuccess: () => {
+        const _subtask = subTodos.filter((item) => item.id !== subtaskId);
+        onCheckedSubtask(id, _subtask);
+      }
+    });
   };
 
   return (

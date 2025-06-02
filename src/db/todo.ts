@@ -30,6 +30,31 @@ export async function addTodo({
   });
 }
 
+export async function updateTodo({
+  id,
+  description,
+  dueDate,
+  completed
+}: {
+  id: string;
+  description?: string;
+  dueDate?: Date;
+  completed?: boolean;
+}) {
+  const updateData: any = {};
+
+  if (description !== undefined) updateData.description = description;
+  if (dueDate !== undefined) updateData.dueDate = dueDate;
+  if (completed !== undefined) updateData.completed = completed;
+
+  return await db.todo.update({
+    where: {
+      id
+    },
+    data: updateData
+  });
+}
+
 export async function createSubTodo({
   todoId,
   description
@@ -41,6 +66,45 @@ export async function createSubTodo({
     data: {
       description,
       todoId
+    }
+  });
+}
+
+export async function updateSubTodo({
+  id,
+  description
+}: {
+  id: string;
+  description: string;
+}) {
+  return await db.subTodo.update({
+    where: {
+      id
+    },
+    data: {
+      description
+    }
+  });
+}
+
+export async function deleteTodo(id: string) {
+  await db.subTodo.deleteMany({
+    where: {
+      todoId: id
+    }
+  });
+
+  return await db.todo.delete({
+    where: {
+      id
+    }
+  });
+}
+
+export async function deleteSubTodo(id: string) {
+  return await db.subTodo.delete({
+    where: {
+      id
     }
   });
 }

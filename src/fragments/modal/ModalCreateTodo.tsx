@@ -1,11 +1,11 @@
 import ModalWrapper from '@/elements/ModalWrapper';
 import { ModalType } from '@/types/modal';
 import { TodoData } from '@/types/todo';
-import { formatDate } from '@/utils/formatDate';
 import { yupResolver } from '@hookform/resolvers/yup';
 import { Button, Group, Stack, TextInput } from '@mantine/core';
 import { DateTimePicker } from '@mantine/dates';
-import React, { useEffect, useState } from 'react';
+import { useMediaQuery } from '@mantine/hooks';
+import React, { useEffect } from 'react';
 import { Controller, SubmitHandler, useForm } from 'react-hook-form';
 import * as yup from 'yup';
 
@@ -19,9 +19,11 @@ export const scheme = yup
 interface ModalCreateTodoProps {
   opened: boolean;
   onClose: () => void;
-  onSubmit: (data: any) => void;
+  onSubmit: (data: FormCreateTodo) => void;
   type?: ModalType;
   data: TodoData | null;
+  selectedItem?: TodoData | null;
+  isLoading?: boolean;
 }
 
 export interface FormCreateTodo {
@@ -34,16 +36,11 @@ const ModalCreateTodo: React.FC<ModalCreateTodoProps> = ({
   onSubmit,
   opened,
   type = 'create',
-  data
+  data,
+  selectedItem,
+  isLoading = false
 }) => {
-  const [deadlineDate, setDeadlineDate] = useState<any>(null);
-
-  useEffect(() => {
-    if (data && type === 'update') {
-      setDeadlineDate(new Date(data.duedate));
-    }
-  }, [data, type]);
-
+  const tabletScreen = useMediaQuery('min-width: 48em');
   const {
     reset,
     control,
@@ -52,20 +49,37 @@ const ModalCreateTodo: React.FC<ModalCreateTodoProps> = ({
     formState: { errors }
   } = useForm<FormCreateTodo>({
     defaultValues: {
-      deadline: data?.duedate ? new Date(data?.duedate).toString() : '',
-      todo: data?.description || ''
+      deadline: selectedItem?.dueDate
+        ? new Date(selectedItem?.dueDate).toString()
+        : data?.dueDate
+        ? new Date(data?.dueDate).toString()
+        : '',
+      todo: selectedItem?.description || data?.description || ''
     },
     resolver: yupResolver(scheme)
   });
+  useEffect(() => {
+    if (opened && selectedItem) {
+      reset({
+        deadline: selectedItem.dueDate
+          ? new Date(selectedItem.dueDate).toString()
+          : '',
+        todo: selectedItem.description || ''
+      });
+    } else if (!opened) {
+      reset({
+        deadline: '',
+        todo: ''
+      });
+    }
+  }, [opened, selectedItem, reset]);
 
   const handleChangeDate = (date: string, field: any) => {
-    setDeadlineDate(date);
     field.onChange(date);
   };
 
   const handleSubmitForm: SubmitHandler<FormCreateTodo> = (values) => {
     onSubmit(values);
-    setDeadlineDate(null);
     reset();
   };
 
@@ -73,7 +87,7 @@ const ModalCreateTodo: React.FC<ModalCreateTodoProps> = ({
     <ModalWrapper
       opened={opened}
       close={onClose}
-      title={type !== 'update' ? 'Add Todo' : 'Edit Todo'}
+      title={selectedItem ? 'Edit Todo' : 'Add Todo'}
     >
       <form onSubmit={handleSubmit(handleSubmitForm)}>
         <Stack gap={24}>
@@ -91,8 +105,8 @@ const ModalCreateTodo: React.FC<ModalCreateTodoProps> = ({
               <DateTimePicker
                 label='Date Time'
                 withAsterisk
-                minDate={type === 'create' ? new Date() : undefined}
-                value={deadlineDate}
+                minDate={!selectedItem ? new Date() : undefined}
+                value={field?.value ? new Date(field?.value) : null}
                 placeholder='DD/MM/YYYY Time'
                 error={errors?.deadline?.message as string}
                 onChange={(date) => handleChangeDate(date as string, field)}
@@ -101,11 +115,17 @@ const ModalCreateTodo: React.FC<ModalCreateTodoProps> = ({
             control={control}
           />
 
-          <Group justify='flex-end' gap={16} pt={16}>
+          <Group
+            justify={tabletScreen ? 'flex-end' : 'space-between'}
+            gap={16}
+            pt={16}
+          >
             <Button
               p={12}
               miw={110}
               type='submit'
+              loading={isLoading}
+              fullWidth={!tabletScreen}
               styles={{
                 root: {
                   backgroundColor: '#154886',
@@ -121,6 +141,8 @@ const ModalCreateTodo: React.FC<ModalCreateTodoProps> = ({
               onClick={onClose}
               p={12}
               miw={110}
+              disabled={isLoading}
+              fullWidth={!tabletScreen}
               styles={{
                 root: {
                   backgroundColor: '#E3E8EF',

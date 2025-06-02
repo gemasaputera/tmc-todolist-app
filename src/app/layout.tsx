@@ -1,10 +1,13 @@
 import type { Metadata } from 'next';
 import '@mantine/core/styles.css';
 import '@mantine/dates/styles.css';
+import '@mantine/notifications/styles.css';
 import './globals.css';
 import { MantineProvider } from '@mantine/core';
+import { Notifications } from '@mantine/notifications';
 import { Inter } from 'next/font/google';
 import { theme } from '@/theme';
+import QueryProvider from '@/providers/QueryProvider';
 
 const inter = Inter({ subsets: ['latin'] });
 
@@ -28,7 +31,12 @@ export default function RootLayout({
   return (
     <html lang='en'>
       <body className={inter.className}>
-        <MantineProvider theme={theme}>{children}</MantineProvider>
+        <MantineProvider theme={theme}>
+          <QueryProvider>
+            <Notifications />
+            {children}
+          </QueryProvider>
+        </MantineProvider>
       </body>
     </html>
   );
