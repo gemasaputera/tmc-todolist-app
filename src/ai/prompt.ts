@@ -15,7 +15,7 @@ export function createOptimizedPrompt(
 
   return `${basePrompts[category]}
   
-  Generate exactly 5 actionable todos after this day ${now.toISOString()}. Each should be specific, measurable, and achievable.
+  Generate exactly 5 actionable todos with duedate after this day ${now.toISOString()}. Each should be specific, measurable, and achievable.
   
   Return ONLY a JSON array with this exact structure:
   [
