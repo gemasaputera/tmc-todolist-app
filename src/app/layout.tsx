@@ -5,11 +5,11 @@ import '@mantine/notifications/styles.css';
 import './globals.css';
 import { MantineProvider } from '@mantine/core';
 import { Notifications } from '@mantine/notifications';
-import { Inter } from 'next/font/google';
+import { Montserrat } from 'next/font/google';
 import { theme } from '@/theme';
 import QueryProvider from '@/providers/QueryProvider';
 
-const inter = Inter({ subsets: ['latin'] });
+const inter = Montserrat({ subsets: ['latin'] });
 
 export const metadata: Metadata = {
   title: 'Todo Apps',

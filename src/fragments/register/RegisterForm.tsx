@@ -102,15 +102,7 @@ const RegisterForm: React.FC = () => {
             />
           </Stack>
           <Stack gap={16} pt={24}>
-            <Button
-              type='submit'
-              variant='filled'
-              bg={'#154886'}
-              mih={48}
-              radius={'md'}
-            >
-              Register
-            </Button>
+            <Button type='submit'>Register</Button>
             <Text ta='center' size='sm'>
               Already have an account?{' '}
               <Link href='/login' style={{ color: '#154886' }}>

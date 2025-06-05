@@ -15,20 +15,26 @@ import {
   useCreateTodo,
   useDeleteTodo,
   useUpdateTodo,
-  useTodos
+  useTodos,
+  useGenerateAITodos
 } from '@/hooks/useTodos';
+import ModalGenerateAi from '../modal/ModalGenerateAi';
+import { FaMagic } from 'react-icons/fa';
 
 const TodoPage = () => {
   const [modalType, setModalType] = useState<ModalType>('create');
   const [selectedItem, setSelectedItem] = useState<TodoData | null>(null);
   const [openedModal, { toggle: toggleModal }] = useDisclosure(false);
   const [openedDelete, { toggle: toggleDelete }] = useDisclosure(false);
+  const [openedModalGenerateAi, { toggle: toggleGenerateAi }] =
+    useDisclosure(false);
 
   // Use TanStack Query hooks
   const { data: listTodo = [], isLoading, isError } = useTodos();
   const createTodoMutation = useCreateTodo();
   const updateTodoMutation = useUpdateTodo();
   const deleteTodoMutation = useDeleteTodo();
+  const generateAITodos = useGenerateAITodos();
 
   const handleCreateTodo = () => {
     setSelectedItem(null);
@@ -94,6 +100,9 @@ const TodoPage = () => {
       );
     }
   };
+
+  const handleGenerate = () => toggleGenerateAi();
+
   return (
     <>
       <AppShell.Main pr={{ base: 0, md: 32 }}>
@@ -103,19 +112,13 @@ const TodoPage = () => {
             <Button
               rightSection={<HiPlus />}
               variant='outline'
-              radius={'md'}
-              px={16}
-              py={14}
-              h={'auto'}
-              styles={{
-                root: {
-                  border: '1px solid #BDBDBD',
-                  color: '#4F4F4F'
-                }
-              }}
               onClick={handleCreateTodo}
             >
               Create Todo
+            </Button>
+
+            <Button onClick={handleGenerate} rightSection={<FaMagic />}>
+              Generate AI
             </Button>
           </Group>
 
@@ -152,6 +155,11 @@ const TodoPage = () => {
         onConfirm={onDelete}
         name={selectedItem?.description || ''}
         isLoading={deleteTodoMutation.isPending}
+      />
+
+      <ModalGenerateAi
+        onClose={toggleGenerateAi}
+        opened={openedModalGenerateAi}
       />
     </>
   );

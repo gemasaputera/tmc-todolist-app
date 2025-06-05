@@ -104,14 +104,7 @@ const LoginForm: React.FC<LoginFormProps> = ({ user, handleSubmitForm }) => {
             />
           </Stack>
           <Stack gap={16} pt={24}>
-            <Button
-              type='submit'
-              variant='filled'
-              bg={'#154886'}
-              mih={48}
-              radius={'md'}
-              loading={loginMutation.isPending}
-            >
+            <Button type='submit' loading={loginMutation.isPending}>
               Sign in
             </Button>
             <Text ta='center' size='sm'>

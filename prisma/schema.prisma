@@ -35,10 +35,25 @@ model SubTodo {
   todo        Todo     @relation(fields: [todoId], references: [id])
 }
 
+model AIUsage {
+  id          String   @id @default(cuid())
+  userId      String
+  model       String
+  category    String
+  tokens      Int
+  cost        Float
+  createdAt   DateTime @default(now())
+  user        User     @relation(fields: [userId], references: [id])
+}
+
 model User {
-  id            String   @id @default(uuid())
-  email         String   @unique
-  name          String
-  password      String
-  todos         Todo[]
+  id                String    @id @default(uuid())
+  email             String    @unique
+  name              String
+  password          String
+  aiGenerations     Int       @default(0)
+  subscriptionTier  String    @default("free")
+  resetDate         DateTime  @default(now())
+  todos             Todo[]
+  aiUsages          AIUsage[]
 }

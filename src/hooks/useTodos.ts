@@ -191,3 +191,44 @@ export const useToggleTodoCompletion = () => {
     }
   });
 };
+
+// Generate todos with AI
+export const useGenerateAITodos = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (params: { category: string; input: string }) => {
+      const response = await fetch('/api/todo/generate', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(params)
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || 'Failed to generate AI todos');
+      }
+
+      return response.json();
+    },
+    onSuccess: (data) => {
+      // Invalidate the todos list query to refetch the data
+      queryClient.invalidateQueries({ queryKey: todoKeys.lists() });
+      notifications.show({
+        title: 'Success',
+        message: `Generated ${data.data?.length || 0} AI todos successfully`,
+        color: 'green'
+      });
+    },
+    onError: (error: Error) => {
+      console.error('Error generating AI todos:', error);
+      notifications.show({
+        title: 'Error',
+        message: error.message || 'Failed to generate AI todos',
+        color: 'red'
+      });
+    }
+  });
+};

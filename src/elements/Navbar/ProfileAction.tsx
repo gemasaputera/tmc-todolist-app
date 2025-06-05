@@ -5,9 +5,9 @@ import {
   Text,
   Avatar,
   Menu,
-  Button,
   Tooltip,
-  Skeleton
+  Skeleton,
+  UnstyledButton
 } from '@mantine/core';
 import { useDisclosure } from '@mantine/hooks';
 import Image from 'next/image';
@@ -30,7 +30,7 @@ const ProfileAction: React.FC<ProfileActionProps> = () => {
       ) : (
         <Menu shadow='md' width={140}>
           <Menu.Target>
-            <Button variant='transparent' p={0} h={'auto'}>
+            <UnstyledButton>
               <Group gap={12}>
                 <Tooltip label={user?.name || user?.email}>
                   <Text fz={16} c={'#4F4F4F'} className={styles.username}>
@@ -43,7 +43,7 @@ const ProfileAction: React.FC<ProfileActionProps> = () => {
                   src={user?.image || '/default_profile.png'}
                 />
               </Group>
-            </Button>
+            </UnstyledButton>
           </Menu.Target>
 
           <Menu.Dropdown className='box-shadow'>

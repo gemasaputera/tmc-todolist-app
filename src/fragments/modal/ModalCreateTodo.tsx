@@ -115,43 +115,11 @@ const ModalCreateTodo: React.FC<ModalCreateTodoProps> = ({
             control={control}
           />
 
-          <Group
-            justify={tabletScreen ? 'flex-end' : 'space-between'}
-            gap={16}
-            pt={16}
-          >
-            <Button
-              p={12}
-              miw={110}
-              type='submit'
-              loading={isLoading}
-              fullWidth={!tabletScreen}
-              styles={{
-                root: {
-                  backgroundColor: '#154886',
-                  fontSize: 14,
-                  fontWeight: 500
-                }
-              }}
-            >
+          <Group gap={16} pt={16}>
+            <Button type='submit' loading={isLoading}>
               Save
             </Button>
-            <Button
-              variant='light'
-              onClick={onClose}
-              p={12}
-              miw={110}
-              disabled={isLoading}
-              fullWidth={!tabletScreen}
-              styles={{
-                root: {
-                  backgroundColor: '#E3E8EF',
-                  color: '#154886',
-                  fontSize: 14,
-                  fontWeight: 500
-                }
-              }}
-            >
+            <Button variant='light' onClick={onClose} disabled={isLoading}>
               Cancel
             </Button>
           </Group>

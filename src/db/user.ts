@@ -29,3 +29,32 @@ export async function getUserByEmail(email: string) {
     }
   });
 }
+
+export async function getUserById(id: string) {
+  return await db.user.findUnique({
+    where: {
+      id
+    }
+  });
+}
+
+export async function updateUser(
+  id: string,
+  data: {
+    email?: string;
+    name?: string;
+    password?: string;
+    aiGenerations?: number;
+    subscriptionTier?: string;
+    resetDate?: Date;
+  }
+) {
+  return await db.user.update({
+    where: {
+      id
+    },
+    data: {
+      ...data
+    }
+  });
+}

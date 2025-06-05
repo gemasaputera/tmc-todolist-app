@@ -14,15 +14,9 @@ const MainPage = () => {
       layout='alt'
       header={{ height: 60 }}
       footer={{ height: 60 }}
-      navbar={{
-        width: 300,
-        breakpoint: 'sm',
-        collapsed: { desktop: opened, mobile: opened }
-      }}
       padding='md'
     >
       <Header collapsed={opened} toggle={() => toggle()} />
-      <Sidebar toggle={() => toggle()} />
       <TodoPage />
     </AppShell>
   );

@@ -28,8 +28,8 @@ const ModalLogout: React.FC<ModalLogoutProps> = ({
       const response = await fetch('/api/logout', {
         method: 'GET',
         headers: {
-          'Content-Type': 'application/json',
-        },
+          'Content-Type': 'application/json'
+        }
       });
 
       if (response.ok) {
@@ -49,39 +49,11 @@ const ModalLogout: React.FC<ModalLogoutProps> = ({
         <Text fz={14} fw={500}>
           Are you sure you want to logout?
         </Text>
-        <Group gap={16} flex={1} justify="space-between">
-          <Button
-            variant="light"
-            onClick={onClose}
-            p={12}
-            h={'auto'}
-            miw={110}
-            styles={{
-              root: {
-                backgroundColor: '#E3E8EF',
-                color: '#154886',
-                fontSize: 14,
-                fontWeight: 500
-              }
-            }}
-          >
+        <Group gap={16} flex={1} justify='space-between'>
+          <Button variant='light' onClick={onClose}>
             Cancel
           </Button>
-          <Button
-            p={12}
-            h={'auto'}
-            miw={110}
-            styles={{
-              root: {
-                backgroundColor: '#154886',
-                fontSize: 14,
-                fontWeight: 500
-              }
-            }}
-            onClick={handleLogout}
-          >
-            Logout
-          </Button>
+          <Button onClick={handleLogout}>Logout</Button>
         </Group>
       </Stack>
     </ModalWrapper>
