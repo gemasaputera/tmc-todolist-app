@@ -1,6 +1,6 @@
 'use client';
 
-import { AppShell, Button, Group, Text, Title } from '@mantine/core';
+import { AppShell, Button, Grid, Group, Text, Title } from '@mantine/core';
 import React, { useState } from 'react';
 import { HiPlus } from 'react-icons/hi2';
 import TodoList from './TodoList';
@@ -107,25 +107,30 @@ const TodoPage = () => {
     <>
       <AppShell.Main pr={{ base: 0, md: 32 }}>
         <section className={styles['container-section']}>
-          <Group align='center' mb={32}>
-            <Text fz={24}>📝 Todo</Text>
-            <Button
-              rightSection={<HiPlus />}
-              variant='outline'
-              onClick={handleCreateTodo}
-            >
-              Create Todo
-            </Button>
-
-            <Button onClick={handleGenerate} rightSection={<FaMagic />}>
-              Generate AI
-            </Button>
-          </Group>
+          <Grid gutter={16} mb={24}>
+            <Grid.Col span={{ base: 12, md: 'content' }}>
+              <Text fz={24}>📝 Todo</Text>
+            </Grid.Col>
+            <Grid.Col span={{ base: 6, md: 'content' }}>
+              <Button
+                rightSection={<HiPlus />}
+                variant='outline'
+                onClick={handleCreateTodo}
+              >
+                Create Todo
+              </Button>
+            </Grid.Col>
+            <Grid.Col span={{ base: 6, md: 'content' }}>
+              <Button onClick={handleGenerate} rightSection={<FaMagic />}>
+                Generate AI
+              </Button>
+            </Grid.Col>
+          </Grid>
 
           {isLoading ? (
             <Text>Loading todos...</Text>
           ) : isError ? (
-            <Text color='red'>Error loading todos. Please try again.</Text>
+            <Text c='red'>Error loading todos. Please try again.</Text>
           ) : listTodo.length > 0 ? (
             <TodoList
               data={listTodo}

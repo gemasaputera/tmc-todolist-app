@@ -1,7 +1,14 @@
 import { SubtaskData } from '@/types/todo';
 import React, { useEffect, useState, useRef } from 'react';
 import styles from './styles.module.css';
-import { ActionIcon, Checkbox, Flex, Input, Text } from '@mantine/core';
+import {
+  ActionIcon,
+  Checkbox,
+  Flex,
+  Input,
+  Text,
+  Textarea
+} from '@mantine/core';
 import { FiTrash } from 'react-icons/fi';
 import { useDisclosure } from '@mantine/hooks';
 import ModalDelete from '@/fragments/modal/ModalDelete';
@@ -104,11 +111,12 @@ const SubTodoItem: React.FC<SubTodoItemProps> = ({
             {description}
           </Text>
         ) : (
-          <Input
+          <Textarea
             flex={1}
             variant='unstyled'
             placeholder={description}
             value={value || ''}
+            autosize
             onChange={(event) => handleChangeTitle(event.target.value)}
             styles={{
               input: {

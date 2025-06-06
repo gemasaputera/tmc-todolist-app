@@ -1,8 +1,8 @@
 import ModalWrapper from '@/elements/ModalWrapper';
 import { ModalType } from '@/types/modal';
-import { TodoData } from '@/types/todo';
+import { TodoData, ProjectData, TodoPriority, PRIORITY_LABELS } from '@/types/todo';
 import { yupResolver } from '@hookform/resolvers/yup';
-import { Button, Group, Stack, TextInput } from '@mantine/core';
+import { Button, Group, Stack, TextInput, Select } from '@mantine/core';
 import { DateTimePicker } from '@mantine/dates';
 import { useMediaQuery } from '@mantine/hooks';
 import React, { useEffect } from 'react';
@@ -12,7 +12,9 @@ import * as yup from 'yup';
 export const scheme = yup
   .object({
     todo: yup.string().required('Todo is required'),
-    deadline: yup.string().required('Date Time is required')
+    deadline: yup.string().required('Date Time is required'),
+    priority: yup.number().min(1).max(3).required('Priority is required'),
+    projectId: yup.string().required('Project is required')
   })
   .required();
 
@@ -24,11 +26,14 @@ interface ModalCreateTodoProps {
   data: TodoData | null;
   selectedItem?: TodoData | null;
   isLoading?: boolean;
+  projects?: ProjectData[];
 }
 
 export interface FormCreateTodo {
   todo: string;
   deadline: string;
+  priority: number;
+  projectId: string;
 }
 
 const ModalCreateTodo: React.FC<ModalCreateTodoProps> = ({
@@ -38,7 +43,8 @@ const ModalCreateTodo: React.FC<ModalCreateTodoProps> = ({
   type = 'create',
   data,
   selectedItem,
-  isLoading = false
+  isLoading = false,
+  projects = []
 }) => {
   const tabletScreen = useMediaQuery('min-width: 48em');
   const {
@@ -54,7 +60,9 @@ const ModalCreateTodo: React.FC<ModalCreateTodoProps> = ({
         : data?.dueDate
         ? new Date(data?.dueDate).toString()
         : '',
-      todo: selectedItem?.description || data?.description || ''
+      todo: selectedItem?.description || data?.description || '',
+      priority: selectedItem?.priority || data?.priority || TodoPriority.LOW,
+      projectId: selectedItem?.projectId || data?.projectId || (projects.find(p => p.isInbox)?.id || projects[0]?.id || '')
     },
     resolver: yupResolver(scheme)
   });
@@ -64,15 +72,19 @@ const ModalCreateTodo: React.FC<ModalCreateTodoProps> = ({
         deadline: selectedItem.dueDate
           ? new Date(selectedItem.dueDate).toString()
           : '',
-        todo: selectedItem.description || ''
+        todo: selectedItem.description || '',
+        priority: selectedItem.priority || TodoPriority.LOW,
+        projectId: selectedItem.projectId || (projects.find(p => p.isInbox)?.id || projects[0]?.id || '')
       });
     } else if (!opened) {
       reset({
         deadline: '',
-        todo: ''
+        todo: '',
+        priority: TodoPriority.LOW,
+        projectId: projects.find(p => p.isInbox)?.id || projects[0]?.id || ''
       });
     }
-  }, [opened, selectedItem, reset]);
+  }, [opened, selectedItem, reset, projects]);
 
   const handleChangeDate = (date: string, field: any) => {
     field.onChange(date);
@@ -110,6 +122,45 @@ const ModalCreateTodo: React.FC<ModalCreateTodoProps> = ({
                 placeholder='DD/MM/YYYY Time'
                 error={errors?.deadline?.message as string}
                 onChange={(date) => handleChangeDate(date as string, field)}
+              />
+            )}
+            control={control}
+          />
+
+          <Controller
+            name='priority'
+            render={({ field }) => (
+              <Select
+                label='Priority'
+                withAsterisk
+                placeholder='Select priority'
+                data={[
+                  { value: '1', label: PRIORITY_LABELS[1] },
+                  { value: '2', label: PRIORITY_LABELS[2] },
+                  { value: '3', label: PRIORITY_LABELS[3] }
+                ]}
+                value={field.value?.toString()}
+                onChange={(value) => field.onChange(value ? parseInt(value) : TodoPriority.LOW)}
+                error={errors?.priority?.message as string}
+              />
+            )}
+            control={control}
+          />
+
+          <Controller
+            name='projectId'
+            render={({ field }) => (
+              <Select
+                label='Project'
+                withAsterisk
+                placeholder='Select project'
+                data={projects.map(project => ({
+                  value: project.id,
+                  label: project.name
+                }))}
+                value={field.value}
+                onChange={(value) => field.onChange(value)}
+                error={errors?.projectId?.message as string}
               />
             )}
             control={control}

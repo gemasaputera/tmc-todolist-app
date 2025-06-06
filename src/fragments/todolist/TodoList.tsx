@@ -1,7 +1,6 @@
-import Card from '@/elements/Card';
 import TodoItem from '@/elements/Todo/TodoItem';
 import { TodoData } from '@/types/todo';
-import { Grid, Stack } from '@mantine/core';
+import { Stack, Text, Button } from '@mantine/core';
 import React, { useEffect, useState } from 'react';
 import dayjs from 'dayjs';
 import { useToggleTodoCompletion } from '@/hooks/useTodos';
@@ -11,20 +10,56 @@ interface TodoListProps {
   data: TodoData[];
   onEdit: (id: string) => void;
   onDelete: (id: string) => void;
+  onAddTodo?: (date: string) => void;
 }
 
-const TodoList: React.FC<TodoListProps> = ({ data, onEdit, onDelete }) => {
-  const [listData, setListData] = useState<TodoData[]>([]);
+interface GroupedTodos {
+  [date: string]: TodoData[];
+}
+
+const TodoList: React.FC<TodoListProps> = ({
+  data,
+  onEdit,
+  onDelete,
+  onAddTodo
+}) => {
+  const [groupedData, setGroupedData] = useState<GroupedTodos>({});
   const toggleTodoMutation = useToggleTodoCompletion();
   const createSubTodoMutation = useCreateSubTodo();
 
   useEffect(() => {
     if (data.length > 0) {
-      const _data = data.sort(
-        (a, b) =>
-          dayjs(b.dueDate).millisecond() - dayjs(a.dueDate).millisecond()
-      );
-      setListData(_data);
+      const grouped = data.reduce((acc: GroupedTodos, todo) => {
+        const dateKey = dayjs(todo.dueDate).format('DD MMM YYYY');
+
+        if (!acc[dateKey]) {
+          acc[dateKey] = [];
+        }
+
+        acc[dateKey].push(todo);
+
+        return acc;
+      }, {});
+
+      // Sort dates in descending order and sort todos within each date
+      const sortedGrouped: GroupedTodos = {};
+      Object.keys(grouped)
+        .sort(
+          (a, b) =>
+            dayjs(a, 'DD MMM YYYY').valueOf() -
+            dayjs(b, 'DD MMM YYYY').valueOf()
+        )
+        .forEach((key) => {
+          // Sort todos: incomplete (checked = false) first, then by due date
+          sortedGrouped[key] = grouped[key].sort((a, b) => {
+            if (a.checked !== b.checked) {
+              return a.checked ? 1 : -1; // false (incomplete) comes first
+            }
+            return dayjs(a.dueDate).valueOf() - dayjs(b.dueDate).valueOf();
+          });
+        });
+
+      setGroupedData(sortedGrouped);
     }
   }, [data]);
 
@@ -46,17 +81,35 @@ const TodoList: React.FC<TodoListProps> = ({ data, onEdit, onDelete }) => {
   };
 
   return (
-    <Grid gutter={{ base: 12, md: 40 }}>
-      <Grid.Col span={{ base: 12, md: 6 }}>
-        <Card title='Not Checked'>
-          <Stack gap={14}>
-            {listData
-              .filter((item) => !item.checked)
-              .sort(
-                (a, b) =>
-                  dayjs(a.dueDate).valueOf() - dayjs(b.dueDate).valueOf()
-              )
-              .map((item: TodoData) => (
+    <Stack gap={24}>
+      {Object.entries(groupedData).map(([date, todos]) => (
+        <div key={date}>
+          <Stack gap={16}>
+            {/* Date Header */}
+            <div
+              style={{
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'center'
+              }}
+            >
+              <Text size='lg' fw={600}>
+                {date}
+              </Text>
+              {onAddTodo && (
+                <Button
+                  size='sm'
+                  variant='outline'
+                  onClick={() => onAddTodo(date)}
+                >
+                  Add Todo
+                </Button>
+              )}
+            </div>
+
+            {/* Todos for this date */}
+            <Stack gap={14}>
+              {todos.map((item: TodoData) => (
                 <TodoItem
                   key={item.id}
                   {...item}
@@ -67,33 +120,11 @@ const TodoList: React.FC<TodoListProps> = ({ data, onEdit, onDelete }) => {
                   onCheckedSubtask={handleCheckedSubtask}
                 />
               ))}
+            </Stack>
           </Stack>
-        </Card>
-      </Grid.Col>
-      <Grid.Col span={{ base: 12, md: 6 }}>
-        <Card title='Checked'>
-          <Stack gap={14}>
-            {listData
-              .filter((item) => item.checked)
-              .sort(
-                (a, b) =>
-                  dayjs(a.dueDate).valueOf() - dayjs(b.dueDate).valueOf()
-              )
-              .map((item: TodoData) => (
-                <TodoItem
-                  key={item.id}
-                  {...item}
-                  onChecked={handleCheckedTodo}
-                  onDelete={onDelete}
-                  onEdit={onEdit}
-                  onSubtask={handleAddSubtask}
-                  onCheckedSubtask={handleCheckedSubtask}
-                />
-              ))}
-          </Stack>
-        </Card>
-      </Grid.Col>
-    </Grid>
+        </div>
+      ))}
+    </Stack>
   );
 };
 

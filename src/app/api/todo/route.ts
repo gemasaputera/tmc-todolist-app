@@ -1,4 +1,4 @@
-import { addTodo, deleteTodo, getTodo } from '@/db/todo';
+import { addTodo, deleteTodo, getTodo, getOrCreateInboxProject } from '@/db/todo';
 import { NextResponse } from 'next/server';
 import { cookies } from 'next/headers';
 
@@ -13,9 +13,13 @@ export async function POST(request: Request) {
 
   const userData = JSON.parse(tokenCookie.value);
 
+  // Get or create inbox project for the user
+  const inboxProject = await getOrCreateInboxProject(userData.id);
+
   const todoData = {
     ...body,
-    userId: userData.id
+    userId: userData.id,
+    projectId: body.projectId || inboxProject.id
   };
 
   const todo = await addTodo(todoData);

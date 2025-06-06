@@ -4,7 +4,7 @@ import { cookies } from 'next/headers';
 import { NextResponse } from 'next/server';
 import genAI, { configAI } from '@/ai/gemini';
 import { trackUsage } from '@/db/aiUsages';
-import { addTodo } from '@/db/todo';
+import { addTodo, createSubTodo, getOrCreateInboxProject } from '@/db/todo';
 
 export async function POST(request: Request) {
   const tokenCookie = (await cookies()).get('__tmc_token__');
@@ -57,7 +57,60 @@ export async function POST(request: Request) {
   }
 
   const text = response.text();
-  const todos = JSON.parse(text);
+  console.log('AI Response:', text);
+
+  // Clean and validate the response
+  let cleanedText = text.trim();
+
+  // Check if the response is truncated (doesn't end with ] or })
+  if (!cleanedText.endsWith(']') && !cleanedText.endsWith('}')) {
+    console.log('Response appears truncated, attempting to fix...');
+    // Find the last complete object
+    const lastCompleteObject = cleanedText.lastIndexOf('}');
+    if (lastCompleteObject !== -1) {
+      cleanedText = cleanedText.substring(0, lastCompleteObject + 1) + ']';
+      console.log('Fixed truncated response:', cleanedText);
+    }
+  }
+
+  let todos;
+  try {
+    todos = JSON.parse(cleanedText);
+  } catch (parseError) {
+    return NextResponse.json(
+      {
+        message: 'Invalid JSON response from AI',
+        error:
+          parseError instanceof Error ? parseError.message : 'Unknown error'
+      },
+      { status: 500 }
+    );
+  }
+
+  if (!Array.isArray(todos)) {
+    return NextResponse.json(
+      { message: 'AI response is not an array' },
+      { status: 500 }
+    );
+  }
+
+  for (let i = 0; i < todos.length; i++) {
+    const todo = todos[i];
+    if (!todo.task || !todo.dueDate || !todo.priority) {
+      console.error(`Invalid todo at index ${i}:`, todo);
+      return NextResponse.json(
+        { message: `Invalid todo structure at index ${i}` },
+        { status: 500 }
+      );
+    }
+
+    if (!todo.subTodos || !Array.isArray(todo.subTodos)) {
+      todo.subTodos = [];
+    }
+  }
+
+  // Get or create inbox project for the user
+  const inboxProject = await getOrCreateInboxProject(userData.id);
 
   const createdTodos = [];
   for (const todo of todos) {
@@ -65,10 +118,23 @@ export async function POST(request: Request) {
       const todoData = {
         description: todo.task,
         dueDate: new Date(todo.dueDate),
-        userId: userData.id
+        userId: userData.id,
+        projectId: inboxProject.id,
+        priority: todo.priority === 'high' ? 3 : todo.priority === 'medium' ? 2 : 1
       };
       const createdTodo = await addTodo(todoData);
       if (createdTodo) {
+        // Create subTodos if they exist
+        if (todo.subTodos && Array.isArray(todo.subTodos)) {
+          for (let i = 0; i < todo.subTodos.length; i++) {
+            const subTodo = todo.subTodos[i];
+            await createSubTodo({
+              todoId: createdTodo.id,
+              description: subTodo.description,
+              sortOrder: i
+            });
+          }
+        }
         createdTodos.push(createdTodo);
       }
     } catch (error) {

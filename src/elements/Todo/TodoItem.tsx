@@ -1,12 +1,17 @@
-import { Checkbox, Flex, Stack, Text } from '@mantine/core';
+import { Checkbox, Group, Paper, Stack, Text } from '@mantine/core';
 import React from 'react';
 import styles from './styles.module.css';
-import { SubtaskData, TodoData } from '@/types/todo';
-import dayjs from 'dayjs';
-import { formatDate } from '@/utils/formatDate';
+import {
+  SubtaskData,
+  TodoData,
+  PRIORITY_COLORS,
+  PRIORITY_LABELS
+} from '@/types/todo';
 import ActionTodo from './ActionTodo';
 import SubTodoItem from './SubTodoItem';
 import { useDeleteSubTodo, useUpdateSubTodo } from '@/hooks/useSubTodos';
+import { AiOutlineExclamation } from 'react-icons/ai';
+import { Tooltip } from '@mantine/core';
 
 interface TodoItemProps extends TodoData {
   onChecked: (id: string, checked: boolean) => void;
@@ -26,30 +31,24 @@ const TodoItem: React.FC<TodoItemProps> = ({
   onEdit,
   onDelete,
   onSubtask,
-  id
+  id,
+  priority = 1
 }) => {
-  const today = dayjs().startOf('day');
-  const due = dayjs(dueDate, 'DD/MM/YYYY HH:mm').startOf('day');
-  const dateColor = () => {
-    if (due.isBefore(today) && !checked) {
-      return 'red';
-    }
-    if (due.isSame(today) && !checked) {
-      return 'green';
-    }
-    return '#154886';
+  // Get priority color based on priority level
+  const getPriorityColor = (priorityLevel: number) => {
+    return (
+      PRIORITY_COLORS[priorityLevel as keyof typeof PRIORITY_COLORS] ||
+      PRIORITY_COLORS[1]
+    );
   };
 
-  const dateLabel = () => {
-    if (due.isBefore(today) && !checked) {
-      return `Overdue - ${formatDate(new Date(dueDate), 'DD/MM/YYYY')}`;
-    }
-    if (due.isSame(today) && !checked) {
-      return 'Today';
-    }
-    return formatDate(new Date(dueDate), 'DD/MM/YYYY');
+  // Get priority label based on priority level
+  const getPriorityLabel = (priorityLevel: number) => {
+    return (
+      PRIORITY_LABELS[priorityLevel as keyof typeof PRIORITY_LABELS] ||
+      PRIORITY_LABELS[1]
+    );
   };
-
   const handleCheckedSubtask = (subtaskId: string, checked: boolean) => {
     const _subtask = subTodos.map((item) => {
       if (item.id === subtaskId) {
@@ -90,50 +89,60 @@ const TodoItem: React.FC<TodoItemProps> = ({
   };
 
   return (
-    <Stack gap={0} className={`box-shadow ${styles['container-todo-item']}`}>
-      <Flex px={15} py={13} gap={16} align={'center'}>
-        <Checkbox
-          defaultChecked={checked}
-          color='green'
-          iconColor='#fff'
-          size='sm'
-          label=''
-          onChange={(event) => onChecked(id, event.target.checked)}
-        />
-        <Text
-          fz={16}
-          fw={400}
-          flex={1}
-          style={{
-            textDecoration: checked ? 'line-through' : 'none'
-          }}
-        >
-          {description}
-        </Text>
-        <Text fz={13} fw={400} c={dateColor()}>
-          {dateLabel()}
-        </Text>
-        <ActionTodo
-          onDelete={onDelete}
-          onEdit={onEdit}
-          onSubtask={onSubtask}
-          id={id}
-        />
-      </Flex>
-      {subTodos.length > 0 && (
-        <Stack gap={15} px={15} pb={15}>
-          {subTodos.map((item) => (
-            <SubTodoItem
-              key={item.id}
-              {...item}
-              onChecked={handleCheckedSubtask}
-              onDelete={handleDeleteSubstask}
-              onChange={handleChangeTitle}
-            />
-          ))}
-        </Stack>
-      )}
-    </Stack>
+    <Paper withBorder radius={'lg'}>
+      <Stack gap={0}>
+        <Group p={16} align='flex-start'>
+          <Checkbox
+            defaultChecked={checked}
+            color='green'
+            iconColor='#fff'
+            size='sm'
+            label=''
+            onChange={(event) => onChecked(id, event.target.checked)}
+          />
+          <Group gap={4} flex={1}>
+            <Text
+              fz={16}
+              fw={400}
+              style={{
+                textDecoration: checked ? 'line-through' : 'none'
+              }}
+            >
+              {description}
+            </Text>
+            <Tooltip
+              label={`Priority: ${getPriorityLabel(priority)}`}
+              position='top'
+              withArrow
+            >
+              <AiOutlineExclamation
+                color={getPriorityColor(priority)}
+                size={16}
+              />
+            </Tooltip>
+          </Group>
+          <ActionTodo
+            onDelete={onDelete}
+            onEdit={onEdit}
+            onSubtask={onSubtask}
+            id={id}
+          />
+        </Group>
+        {subTodos.length > 0 && (
+          <Stack gap={15} px={15} pb={15}>
+            {subTodos.map((item) => (
+              <SubTodoItem
+                key={item.id}
+                {...item}
+                onChecked={handleCheckedSubtask}
+                onDelete={handleDeleteSubstask}
+                onChange={handleChangeTitle}
+              />
+            ))}
+          </Stack>
+        )}
+      </Stack>
+    </Paper>
   );
 };
 

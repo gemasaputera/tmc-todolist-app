@@ -1,3 +1,5 @@
+'use client';
+
 import ModalLogout from '@/fragments/modal/ModalLogout';
 import { useUserSession } from '@/hooks/useUserSession';
 import {
@@ -5,20 +7,14 @@ import {
   Text,
   Avatar,
   Menu,
-  Tooltip,
   Skeleton,
   UnstyledButton
 } from '@mantine/core';
 import { useDisclosure } from '@mantine/hooks';
 import Image from 'next/image';
 import React from 'react';
-import styles from './styles.module.css';
 
-interface ProfileActionProps {
-  user: any;
-}
-
-const ProfileAction: React.FC<ProfileActionProps> = () => {
+const ProfileAction: React.FC = () => {
   const [opened, { toggle }] = useDisclosure(false);
   const { user, loading } = useUserSession();
 
@@ -32,11 +28,9 @@ const ProfileAction: React.FC<ProfileActionProps> = () => {
           <Menu.Target>
             <UnstyledButton>
               <Group gap={12}>
-                <Tooltip label={user?.name || user?.email}>
-                  <Text fz={16} c={'#4F4F4F'} className={styles.username}>
-                    {user?.name || user?.email || ''}
-                  </Text>
-                </Tooltip>
+                <Text fz={'sm'} c={'#4F4F4F'}>
+                  {user?.name || user?.email || ''}
+                </Text>
                 <Avatar
                   size='sm'
                   radius='xl'
