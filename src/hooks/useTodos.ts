@@ -40,7 +40,12 @@ export const useCreateTodo = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async (todoData: { description: string; dueDate: Date }) => {
+    mutationFn: async (todoData: {
+      description: string;
+      dueDate: Date;
+      priority: number;
+      projectId: string;
+    }) => {
       const response = await fetch('/api/todo', {
         method: 'POST',
         headers: {
@@ -85,7 +90,13 @@ export const useUpdateTodo = () => {
       todoData
     }: {
       id: string;
-      todoData: { description?: string; dueDate?: Date; completed?: boolean };
+      todoData: {
+        description?: string;
+        dueDate?: Date;
+        priority?: number;
+        projectId?: string;
+        completed?: boolean;
+      };
     }) => {
       const response = await fetch(`/api/todo/${id}`, {
         method: 'PUT',

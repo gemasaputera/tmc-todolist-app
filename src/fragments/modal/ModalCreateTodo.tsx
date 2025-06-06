@@ -1,10 +1,14 @@
 import ModalWrapper from '@/elements/ModalWrapper';
 import { ModalType } from '@/types/modal';
-import { TodoData, ProjectData, TodoPriority, PRIORITY_LABELS } from '@/types/todo';
+import {
+  TodoData,
+  ProjectData,
+  TodoPriority,
+  PRIORITY_LABELS
+} from '@/types/todo';
 import { yupResolver } from '@hookform/resolvers/yup';
 import { Button, Group, Stack, TextInput, Select } from '@mantine/core';
 import { DateTimePicker } from '@mantine/dates';
-import { useMediaQuery } from '@mantine/hooks';
 import React, { useEffect } from 'react';
 import { Controller, SubmitHandler, useForm } from 'react-hook-form';
 import * as yup from 'yup';
@@ -13,7 +17,7 @@ export const scheme = yup
   .object({
     todo: yup.string().required('Todo is required'),
     deadline: yup.string().required('Date Time is required'),
-    priority: yup.number().min(1).max(3).required('Priority is required'),
+    priority: yup.number().min(1).max(4).required('Priority is required'),
     projectId: yup.string().required('Project is required')
   })
   .required();
@@ -46,7 +50,6 @@ const ModalCreateTodo: React.FC<ModalCreateTodoProps> = ({
   isLoading = false,
   projects = []
 }) => {
-  const tabletScreen = useMediaQuery('min-width: 48em');
   const {
     reset,
     control,
@@ -61,8 +64,14 @@ const ModalCreateTodo: React.FC<ModalCreateTodoProps> = ({
         ? new Date(data?.dueDate).toString()
         : '',
       todo: selectedItem?.description || data?.description || '',
-      priority: selectedItem?.priority || data?.priority || TodoPriority.LOW,
-      projectId: selectedItem?.projectId || data?.projectId || (projects.find(p => p.isInbox)?.id || projects[0]?.id || '')
+      priority:
+        selectedItem?.priority || data?.priority || TodoPriority.VERY_LOW,
+      projectId:
+        selectedItem?.projectId ||
+        data?.projectId ||
+        projects.find((p) => p.isInbox)?.id ||
+        projects[0]?.id ||
+        ''
     },
     resolver: yupResolver(scheme)
   });
@@ -73,18 +82,22 @@ const ModalCreateTodo: React.FC<ModalCreateTodoProps> = ({
           ? new Date(selectedItem.dueDate).toString()
           : '',
         todo: selectedItem.description || '',
-        priority: selectedItem.priority || TodoPriority.LOW,
-        projectId: selectedItem.projectId || (projects.find(p => p.isInbox)?.id || projects[0]?.id || '')
+        priority: selectedItem.priority || TodoPriority.VERY_LOW,
+        projectId:
+          selectedItem.projectId ||
+          projects.find((p) => p.isInbox)?.id ||
+          projects[0]?.id ||
+          ''
       });
     } else if (!opened) {
       reset({
         deadline: '',
         todo: '',
-        priority: TodoPriority.LOW,
-        projectId: projects.find(p => p.isInbox)?.id || projects[0]?.id || ''
+        priority: TodoPriority.VERY_LOW,
+        projectId: projects.find((p) => p.isInbox)?.id || projects[0]?.id || ''
       });
     }
-  }, [opened, selectedItem, reset, projects]);
+  }, [opened, selectedItem, reset]);
 
   const handleChangeDate = (date: string, field: any) => {
     field.onChange(date);
@@ -137,10 +150,13 @@ const ModalCreateTodo: React.FC<ModalCreateTodoProps> = ({
                 data={[
                   { value: '1', label: PRIORITY_LABELS[1] },
                   { value: '2', label: PRIORITY_LABELS[2] },
-                  { value: '3', label: PRIORITY_LABELS[3] }
+                  { value: '3', label: PRIORITY_LABELS[3] },
+                  { value: '4', label: PRIORITY_LABELS[4] }
                 ]}
                 value={field.value?.toString()}
-                onChange={(value) => field.onChange(value ? parseInt(value) : TodoPriority.LOW)}
+                onChange={(value) =>
+                  field.onChange(value ? parseInt(value) : TodoPriority.LOW)
+                }
                 error={errors?.priority?.message as string}
               />
             )}
@@ -154,7 +170,7 @@ const ModalCreateTodo: React.FC<ModalCreateTodoProps> = ({
                 label='Project'
                 withAsterisk
                 placeholder='Select project'
-                data={projects.map(project => ({
+                data={projects.map((project) => ({
                   value: project.id,
                   label: project.name
                 }))}

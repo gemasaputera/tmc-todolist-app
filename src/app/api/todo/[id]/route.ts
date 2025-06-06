@@ -8,7 +8,7 @@ export async function PUT(
 ) {
   try {
     const body = await request.json();
-    const { description, dueDate, completed } = body;
+    const { description, dueDate, completed, priority, projectId } = body;
     const { id } = await params;
 
     // Check for token cookie
@@ -23,6 +23,8 @@ export async function PUT(
     if (description !== undefined) updateData.description = description;
     if (dueDate !== undefined) updateData.dueDate = new Date(dueDate);
     if (completed !== undefined) updateData.completed = completed;
+    if (priority !== undefined) updateData.priority = priority;
+    if (projectId !== undefined) updateData.projectId = projectId;
 
     const todo = await updateTodo(updateData);
 

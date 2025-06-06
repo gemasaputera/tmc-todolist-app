@@ -18,6 +18,7 @@ import {
   useTodos,
   useGenerateAITodos
 } from '@/hooks/useTodos';
+import { useProject } from '@/hooks/useProject';
 import ModalGenerateAi from '../modal/ModalGenerateAi';
 import { FaMagic } from 'react-icons/fa';
 
@@ -31,10 +32,10 @@ const TodoPage = () => {
 
   // Use TanStack Query hooks
   const { data: listTodo = [], isLoading, isError } = useTodos();
+  const { data: projects = [] } = useProject();
   const createTodoMutation = useCreateTodo();
   const updateTodoMutation = useUpdateTodo();
   const deleteTodoMutation = useDeleteTodo();
-  const generateAITodos = useGenerateAITodos();
 
   const handleCreateTodo = () => {
     setSelectedItem(null);
@@ -76,7 +77,9 @@ const TodoPage = () => {
           id: selectedItem.id,
           todoData: {
             description: values.todo,
-            dueDate: new Date(values.deadline)
+            dueDate: new Date(values.deadline),
+            priority: values.priority,
+            projectId: values.projectId
           }
         },
         {
@@ -90,7 +93,9 @@ const TodoPage = () => {
       createTodoMutation.mutate(
         {
           description: values.todo,
-          dueDate: new Date(values.deadline)
+          dueDate: new Date(values.deadline),
+          priority: values.priority,
+          projectId: values.projectId
         },
         {
           onSuccess: () => {
@@ -112,13 +117,13 @@ const TodoPage = () => {
               <Text fz={24}>📝 Todo</Text>
             </Grid.Col>
             <Grid.Col span={{ base: 6, md: 'content' }}>
-              <Button
+              {/* <Button
                 rightSection={<HiPlus />}
                 variant='outline'
                 onClick={handleCreateTodo}
               >
                 Create Todo
-              </Button>
+              </Button> */}
             </Grid.Col>
             <Grid.Col span={{ base: 6, md: 'content' }}>
               <Button onClick={handleGenerate} rightSection={<FaMagic />}>
@@ -136,6 +141,7 @@ const TodoPage = () => {
               data={listTodo}
               onEdit={handleEditTodo}
               onDelete={handleDeleteTodo}
+              onAddTodo={handleCreateTodo}
             />
           ) : (
             <IllustrationState />
@@ -152,6 +158,7 @@ const TodoPage = () => {
         key={selectedItem?.id || 'create'}
         selectedItem={selectedItem}
         isLoading={createTodoMutation.isPending || updateTodoMutation.isPending}
+        projects={projects}
       />
 
       <ModalDelete
