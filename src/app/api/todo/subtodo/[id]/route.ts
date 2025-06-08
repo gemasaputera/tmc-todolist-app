@@ -8,7 +8,7 @@ export async function PUT(
 ) {
   try {
     const body = await request.json();
-    const { description } = body;
+    const { description, completed } = body;
     const { id } = await params;
 
     const tokenCookie = (await cookies()).get('__tmc_token__');
@@ -17,10 +17,11 @@ export async function PUT(
       return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });
     }
 
-    const subtodo = await updateSubTodo({
-      id,
-      description
-    });
+    const updateData: any = { id };
+    if (description !== undefined) updateData.description = description;
+    if (completed !== undefined) updateData.completed = completed;
+
+    const subtodo = await updateSubTodo(updateData);
 
     if (!subtodo) {
       return NextResponse.json(

@@ -9,7 +9,8 @@ const MainPage = () => {
       layout='alt'
       header={{ height: 60 }}
       footer={{ height: 60 }}
-      padding='md'
+      px='md'
+      pb={40}
     >
       <Header />
       <TodoPage />

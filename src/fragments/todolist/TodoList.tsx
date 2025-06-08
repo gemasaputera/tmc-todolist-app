@@ -1,10 +1,14 @@
 import TodoItem from '@/elements/Todo/TodoItem';
 import { TodoData } from '@/types/todo';
-import { Stack, Text, Button } from '@mantine/core';
+import { Stack, Text, Button, ActionIcon, Group } from '@mantine/core';
 import React, { useEffect, useState } from 'react';
 import dayjs from 'dayjs';
 import { useToggleTodoCompletion } from '@/hooks/useTodos';
-import { useCreateSubTodo } from '@/hooks/useSubTodos';
+import {
+  useCreateSubTodo,
+  useToggleSubTodoCompletion
+} from '@/hooks/useSubTodos';
+import { HiPlus } from 'react-icons/hi';
 
 interface TodoListProps {
   data: TodoData[];
@@ -26,6 +30,7 @@ const TodoList: React.FC<TodoListProps> = ({
   const [groupedData, setGroupedData] = useState<GroupedTodos>({});
   const toggleTodoMutation = useToggleTodoCompletion();
   const createSubTodoMutation = useCreateSubTodo();
+  const toggleSubTodoMutation = useToggleSubTodoCompletion();
 
   useEffect(() => {
     if (data.length > 0) {
@@ -41,7 +46,6 @@ const TodoList: React.FC<TodoListProps> = ({
         return acc;
       }, {});
 
-      // Sort dates in descending order and sort todos within each date
       const sortedGrouped: GroupedTodos = {};
       Object.keys(grouped)
         .sort(
@@ -50,10 +54,9 @@ const TodoList: React.FC<TodoListProps> = ({
             dayjs(b, 'DD MMM YYYY').valueOf()
         )
         .forEach((key) => {
-          // Sort todos: incomplete (checked = false) first, then by due date
           sortedGrouped[key] = grouped[key].sort((a, b) => {
             if (a.checked !== b.checked) {
-              return a.checked ? 1 : -1; // false (incomplete) comes first
+              return a.checked ? 1 : -1;
             }
             return dayjs(a.dueDate).valueOf() - dayjs(b.dueDate).valueOf();
           });
@@ -64,16 +67,14 @@ const TodoList: React.FC<TodoListProps> = ({
   }, [data]);
 
   const handleCheckedTodo = (id: string, checked: boolean) => {
-    // Use the toggle todo mutation from TanStack Query
     toggleTodoMutation.mutate({ id, checked });
   };
 
-  const handleCheckedSubtask = (id: string, subtask: any) => {
-    // This will be handled by the API through query invalidation
+  const handleCheckedSubtask = (id: string, checked: boolean) => {
+    toggleSubTodoMutation.mutate({ id, completed: checked });
   };
 
   const handleAddSubtask = (id: string) => {
-    // Use the create subtodo mutation from TanStack Query
     createSubTodoMutation.mutate({
       todoId: id,
       description: `New sub Todo ${data.length + 1}`
@@ -85,29 +86,20 @@ const TodoList: React.FC<TodoListProps> = ({
       {Object.entries(groupedData).map(([date, todos]) => (
         <div key={date}>
           <Stack gap={16}>
-            {/* Date Header */}
-            <div
-              style={{
-                display: 'flex',
-                justifyContent: 'space-between',
-                alignItems: 'center'
-              }}
-            >
+            <Group justify='space-between' align='center'>
               <Text size='lg' fw={600}>
                 {date}
               </Text>
               {onAddTodo && (
-                <Button
-                  size='sm'
-                  variant='outline'
+                <ActionIcon
                   onClick={() => onAddTodo(date)}
+                  c={'dark'}
+                  variant='transparent'
                 >
-                  Add Todo
-                </Button>
+                  <HiPlus />
+                </ActionIcon>
               )}
-            </div>
-
-            {/* Todos for this date */}
+            </Group>
             <Stack gap={14}>
               {todos.map((item: TodoData) => (
                 <TodoItem

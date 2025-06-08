@@ -5,7 +5,7 @@ import {
   ActionIcon,
   Checkbox,
   Flex,
-  Input,
+  Loader,
   Text,
   Textarea
 } from '@mantine/core';
@@ -17,6 +17,7 @@ interface SubTodoItemProps extends SubtaskData {
   onChecked: (id: string, checked: boolean) => void;
   onDelete: (id: string) => void;
   onChange: (id: string, value: string) => void;
+  loading?: boolean;
 }
 const SubTodoItem: React.FC<SubTodoItemProps> = ({
   checked,
@@ -24,6 +25,7 @@ const SubTodoItem: React.FC<SubTodoItemProps> = ({
   onChecked,
   onChange,
   onDelete,
+  loading = false,
   id: subtaskId
 }) => {
   const [openModal, { toggle }] = useDisclosure(false);
@@ -46,18 +48,14 @@ const SubTodoItem: React.FC<SubTodoItemProps> = ({
   };
 
   const handleChangeTitle = (newValue: string) => {
-    // Update the local state immediately for a responsive UI
     setValue(newValue);
 
-    // Clear any existing timer
     if (debounceTimerRef.current) {
       clearTimeout(debounceTimerRef.current);
     }
 
-    // Set a new timer to update the server after a delay
     debounceTimerRef.current = setTimeout(async () => {
       try {
-        // Call the API to update the subtodo
         const response = await fetch(`/api/todo/subtodo/${subtaskId}`, {
           method: 'PUT',
           headers: {
@@ -69,18 +67,15 @@ const SubTodoItem: React.FC<SubTodoItemProps> = ({
         });
 
         if (response.ok) {
-          // Update the parent component's state
           onChange(subtaskId, newValue);
         } else {
-          // If the API call fails, revert to the original value
           setValue(description || '');
         }
       } catch (error) {
         console.error('Error updating subtodo:', error);
-        // If there's an error, revert to the original value
         setValue(description || '');
       }
-    }, 500); // 500ms debounce time
+    }, 500);
   };
   return (
     <>
@@ -91,22 +86,24 @@ const SubTodoItem: React.FC<SubTodoItemProps> = ({
         align={'center'}
         className={`box-shadow ${styles['container-subtask-todo-item']}`}
       >
-        <Checkbox
-          defaultChecked={checked}
-          color='green'
-          iconColor='#fff'
-          size='sm'
-          label=''
-          onChange={(event) => onChecked(subtaskId, event.target.checked)}
-        />
+        {loading ? (
+          <Loader size={'xs'} />
+        ) : (
+          <Checkbox
+            defaultChecked={checked}
+            color='green'
+            iconColor='#fff'
+            size='sm'
+            label=''
+            onChange={(event) => onChecked(subtaskId, event.target.checked)}
+          />
+        )}
         {checked ? (
           <Text
             fz={16}
             fw={400}
             flex={1}
-            style={{
-              textDecoration: checked ? 'line-through' : 'none'
-            }}
+            td={checked ? 'line-through' : 'none'}
           >
             {description}
           </Text>
@@ -118,9 +115,11 @@ const SubTodoItem: React.FC<SubTodoItemProps> = ({
             value={value || ''}
             autosize
             onChange={(event) => handleChangeTitle(event.target.value)}
+            td={checked ? 'line-through' : 'none'}
             styles={{
               input: {
-                fontSize: 16
+                fontSize: 16,
+                fontWeight: 400
               }
             }}
           />

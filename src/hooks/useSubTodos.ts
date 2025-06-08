@@ -2,7 +2,6 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { notifications } from '@mantine/notifications';
 import { todoKeys } from './useTodos';
 
-// Create a new subtodo
 export const useCreateSubTodo = () => {
   const queryClient = useQueryClient();
 
@@ -48,7 +47,6 @@ export const useCreateSubTodo = () => {
   });
 };
 
-// Update a subtodo
 export const useUpdateSubTodo = () => {
   const queryClient = useQueryClient();
 
@@ -75,7 +73,6 @@ export const useUpdateSubTodo = () => {
       return response.json();
     },
     onSuccess: () => {
-      // Invalidate the todos list query to refetch the data
       queryClient.invalidateQueries({ queryKey: todoKeys.lists() });
     },
     onError: (error) => {
@@ -89,7 +86,6 @@ export const useUpdateSubTodo = () => {
   });
 };
 
-// Delete a subtodo
 export const useDeleteSubTodo = () => {
   const queryClient = useQueryClient();
 
@@ -106,7 +102,6 @@ export const useDeleteSubTodo = () => {
       return response.json();
     },
     onSuccess: () => {
-      // Invalidate the todos list query to refetch the data
       queryClient.invalidateQueries({ queryKey: todoKeys.lists() });
       notifications.show({
         title: 'Success',
@@ -119,6 +114,45 @@ export const useDeleteSubTodo = () => {
       notifications.show({
         title: 'Error',
         message: 'Failed to delete sub todo',
+        color: 'red'
+      });
+    }
+  });
+};
+
+export const useToggleSubTodoCompletion = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async ({
+      id,
+      completed
+    }: {
+      id: string;
+      completed: boolean;
+    }) => {
+      const response = await fetch(`/api/todo/subtodo/${id}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ completed })
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to update sub todo completion status');
+      }
+
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: todoKeys.lists() });
+    },
+    onError: (error) => {
+      console.error('Error updating sub todo completion status:', error);
+      notifications.show({
+        title: 'Error',
+        message: 'Failed to update sub todo completion status',
         color: 'red'
       });
     }

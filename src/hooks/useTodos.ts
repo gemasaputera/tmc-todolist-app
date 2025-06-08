@@ -1,8 +1,6 @@
-import { TodoData } from '@/types/todo';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { notifications } from '@mantine/notifications';
 
-// Define the key for todo queries
 export const todoKeys = {
   all: ['todos'] as const,
   lists: () => [...todoKeys.all, 'list'] as const,
@@ -11,7 +9,6 @@ export const todoKeys = {
   detail: (id: string) => [...todoKeys.details(), id] as const
 };
 
-// Fetch all todos
 export const useTodos = () => {
   return useQuery({
     queryKey: todoKeys.lists(),
@@ -22,20 +19,18 @@ export const useTodos = () => {
       }
       const data = await response.json();
 
-      // Map the 'completed' property from the API to the 'checked' property used in the frontend
       return (data?.data || []).map((todo: any) => ({
         ...todo,
-        checked: todo.completed, // Map the completed field to checked
+        checked: todo.completed,
         subTodos: (todo.subTodos || []).map((subTodo: any) => ({
           ...subTodo,
-          checked: subTodo.completed // Map the completed field to checked for subtodos
+          checked: subTodo.completed
         }))
       }));
     }
   });
 };
 
-// Create a new todo
 export const useCreateTodo = () => {
   const queryClient = useQueryClient();
 
@@ -61,7 +56,6 @@ export const useCreateTodo = () => {
       return response.json();
     },
     onSuccess: () => {
-      // Invalidate the todos list query to refetch the data
       queryClient.invalidateQueries({ queryKey: todoKeys.lists() });
       notifications.show({
         title: 'Success',
@@ -80,7 +74,6 @@ export const useCreateTodo = () => {
   });
 };
 
-// Update a todo
 export const useUpdateTodo = () => {
   const queryClient = useQueryClient();
 
@@ -113,7 +106,6 @@ export const useUpdateTodo = () => {
       return response.json();
     },
     onSuccess: () => {
-      // Invalidate the todos list query to refetch the data
       queryClient.invalidateQueries({ queryKey: todoKeys.lists() });
       notifications.show({
         title: 'Success',
@@ -132,7 +124,6 @@ export const useUpdateTodo = () => {
   });
 };
 
-// Delete a todo
 export const useDeleteTodo = () => {
   const queryClient = useQueryClient();
 
@@ -149,7 +140,6 @@ export const useDeleteTodo = () => {
       return response.json();
     },
     onSuccess: () => {
-      // Invalidate the todos list query to refetch the data
       queryClient.invalidateQueries({ queryKey: todoKeys.lists() });
       notifications.show({
         title: 'Success',
@@ -168,7 +158,6 @@ export const useDeleteTodo = () => {
   });
 };
 
-// Toggle todo completion status
 export const useToggleTodoCompletion = () => {
   const queryClient = useQueryClient();
 
@@ -189,7 +178,6 @@ export const useToggleTodoCompletion = () => {
       return response.json();
     },
     onSuccess: () => {
-      // Invalidate the todos list query to refetch the data
       queryClient.invalidateQueries({ queryKey: todoKeys.lists() });
     },
     onError: (error) => {
@@ -203,7 +191,6 @@ export const useToggleTodoCompletion = () => {
   });
 };
 
-// Generate todos with AI
 export const useGenerateAITodos = () => {
   const queryClient = useQueryClient();
 
@@ -225,7 +212,6 @@ export const useGenerateAITodos = () => {
       return response.json();
     },
     onSuccess: (data) => {
-      // Invalidate the todos list query to refetch the data
       queryClient.invalidateQueries({ queryKey: todoKeys.lists() });
       notifications.show({
         title: 'Success',
