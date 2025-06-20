@@ -30,6 +30,13 @@ export default function RootLayout({
 }>) {
   return (
     <html lang='en'>
+      <head>
+        <script
+          defer
+          src="https://cloud.umami.is/script.js"
+          data-website-id="a1b17e3c-13a6-413a-97c6-7df4063f385c"
+        ></script>
+      </head>
       <body className={inter.className}>
         <MantineProvider theme={theme}>
           <QueryProvider>
